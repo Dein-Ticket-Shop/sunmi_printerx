@@ -1,6 +1,6 @@
 name: sunmi_printerx
 description: "A Flutter plugin for Sunmi PrinterX SDK."
-version: 0.0.1
+version: 1.0.0
 
 environment:
     sdk: ">=3.4.3 <4.0.0"
