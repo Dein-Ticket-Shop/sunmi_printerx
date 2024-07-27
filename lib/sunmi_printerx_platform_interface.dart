@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 import 'package:plugin_platform_interface/plugin_platform_interface.dart';
 
 import 'sunmi_printerx_method_channel.dart';
@@ -23,7 +25,23 @@ abstract class SunmiPrinterXPlatform extends PlatformInterface {
     _instance = instance;
   }
 
-  Future<String?> getPlatformVersion() {
-    throw UnimplementedError('platformVersion() has not been implemented.');
+  Future<List<Map<String, dynamic>>> getPrinters() {
+    throw UnimplementedError('getPrinters() has not been implemented.');
+  }
+
+  Future<String> getPrinterStatus(String printerId) {
+    throw UnimplementedError('getPrinterStatus() has not been implemented.');
+  }
+
+  Future<bool> openCashDrawer(String printerId) {
+    throw UnimplementedError('openCashDrawer() has not been implemented.');
+  }
+
+  Future<bool> isCashDrawerOpen(String printerId) {
+    throw UnimplementedError('isCashDrawerOpen() has not been implemented.');
+  }
+
+  Future<void> printEscPosCommands(String printerId, Uint8List commands) {
+    throw UnimplementedError('printEscPosCommands() has not been implemented.');
   }
 }
