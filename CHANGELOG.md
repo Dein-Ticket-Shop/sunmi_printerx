@@ -1,3 +1,3 @@
-## 0.0.1
+## 1.0.0 (2024-07-27)
 
-* TODO: Describe initial release.
+-   Initial implementation
