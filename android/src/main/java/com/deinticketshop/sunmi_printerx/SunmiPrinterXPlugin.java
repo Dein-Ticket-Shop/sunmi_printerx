@@ -15,8 +15,12 @@ import io.flutter.plugin.common.MethodChannel.Result;
 import com.sunmi.printerx.PrinterSdk;
 import com.sunmi.printerx.SdkException;
 import com.sunmi.printerx.api.PrintResult;
+import com.sunmi.printerx.enums.Align;
 import com.sunmi.printerx.enums.PrinterInfo;
 import com.sunmi.printerx.enums.Status;
+import com.sunmi.printerx.style.BaseStyle;
+import com.sunmi.printerx.style.QrStyle;
+import com.sunmi.printerx.style.TextStyle;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -152,10 +156,129 @@ public class SunmiPrinterXPlugin implements FlutterPlugin, MethodCallHandler {
                     }
                 }).start();
                 break;
+            case "setAlign":
+                new Thread(new Runnable() {
+                    @Override
+                    public void run() {
+                        try {
+                            getPrinter(call).lineApi().initLine(BaseStyle.getStyle().setAlign(Align.valueOf(call.argument("align").toString())));
+                            result.success(true);
+                        } catch (SdkException e) {
+                            e.printStackTrace();
+                            result.error("ERROR", e.getMessage(), null);
+                        }
+                    }
+                }).start();
+                break;
+            case "addText": {
+                new Thread(new Runnable() {
+                    @Override
+                    public void run() {
+                        try {
+                            TextStyle style = getTextStyle(call);
+                            getPrinter(call).lineApi().addText(call.argument("text").toString(), style);
+                            result.success(true);
+                        } catch (SdkException e) {
+                            e.printStackTrace();
+                            result.error("ERROR", e.getMessage(), null);
+                        }
+                    }
+                }).start();
+                break;
+            }
+            case "printText": {
+                new Thread(new Runnable() {
+                    @Override
+                    public void run() {
+                        try {
+                            TextStyle style = getTextStyle(call);
+                            getPrinter(call).lineApi().printText(call.argument("text").toString(), style);
+                            result.success(true);
+                        } catch (SdkException e) {
+                            e.printStackTrace();
+                            result.error("ERROR", e.getMessage(), null);
+                        }
+                    }
+                }).start();
+                break;
+            }
+            case "printTexts": {
+                new Thread(new Runnable() {
+                    @Override
+                    public void run() {
+                        try {
+                            // String[] texts, int[] colsWidthArrs, TextStyle[] styles
+                            // style can only be alignment
+                            List<String> texts = call.argument("texts");
+                            List<Integer> colsWidthArrs = call.argument("colsWidthArrs");
+                            List<String> aligns = call.argument("aligns");
+                            List<TextStyle> styles = new ArrayList<>();
+                            for (int i = 0; i < texts.size(); i++) {
+                                styles.add(new TextStyle().setAlign(Align.valueOf(aligns.get(i))));
+                            }
+                            int[] colsWidthArr = new int[colsWidthArrs.size()];
+                            for (int i = 0; i < colsWidthArrs.size(); i++) {
+                                colsWidthArr[i] = colsWidthArrs.get(i);
+                            }
+
+                            getPrinter(call).lineApi().printTexts(texts.toArray(new String[0]), colsWidthArr, styles.toArray(new TextStyle[0]));
+                            result.success(true);
+                        } catch (SdkException e) {
+                            e.printStackTrace();
+                            result.error("ERROR", e.getMessage(), null);
+                        }
+                    }
+                }).start();
+                break;
+            }
+            case "printQrCode": {
+                new Thread(new Runnable() {
+                    @Override
+                    public void run() {
+                        try {
+                            QrStyle style = QrStyle.getStyle();
+                            style.setDot(Integer.parseInt(call.argument("dot").toString()));
+                            style.setAlign(Align.valueOf(call.argument("align").toString()));
+                            getPrinter(call).lineApi().printQrCode(call.argument("data").toString(), style);
+                            result.success(true);
+                        } catch (SdkException e) {
+                            e.printStackTrace();
+                            result.error("ERROR", e.getMessage(), null);
+                        }
+                    }
+                }).start();
+                break;
+            }
+            case "autoOut": {
+                new Thread(new Runnable() {
+                    @Override
+                    public void run() {
+                        try {
+                            getPrinter(call).lineApi().autoOut();
+                            result.success(true);
+                        } catch (SdkException e) {
+                            e.printStackTrace();
+                            result.error("ERROR", e.getMessage(), null);
+                        }
+                    }
+                }).start();
+                break;
+            }
             default:
                 result.notImplemented();
                 break;
         }
+    }
+
+    private static TextStyle getTextStyle(MethodCall call) {
+        return TextStyle.getStyle()
+        .setTextWidthRatio(Integer.parseInt(call.argument("textWidthRatio").toString()))
+        .setTextHeightRatio(Integer.parseInt(call.argument("textHeightRatio").toString()))
+        .setTextSpace(Integer.parseInt(call.argument("textSpace").toString()))
+        .enableBold(Boolean.parseBoolean(call.argument("bold").toString()))
+        .enableUnderline(Boolean.parseBoolean(call.argument("underline").toString()))
+        .enableStrikethrough(Boolean.parseBoolean(call.argument("strikethrough").toString()))
+        .enableItalics(Boolean.parseBoolean(call.argument("italics").toString()));
     }
 
     private PrinterSdk.Printer getPrinter(MethodCall call) {

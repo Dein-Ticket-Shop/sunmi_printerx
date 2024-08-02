@@ -1,5 +1,6 @@
 import 'dart:typed_data';
 
+import 'package:sunmi_printerx/align.dart';
 import 'package:sunmi_printerx/printer.dart';
 import 'package:sunmi_printerx/printerstatus.dart';
 
@@ -27,6 +28,50 @@ class SunmiPrinterX {
         isCashDrawerOpen: () => _isCashDrawerOpen(id),
         printEscPosCommands: (commands) => _printEscPosCommands(id, commands),
         waitForCashDrawerClose: () => _waitForCashDrawerClose(id),
+        setAlign: (align) => _setAlign(id, align),
+        printText: (text,
+                {textWidthRatio = 0,
+                textHeightRatio = 0,
+                textSpace = 0,
+                bold = false,
+                underline = false,
+                strikethrough = false,
+                italic = false,
+                align = Align.left}) =>
+            printText(id, text,
+                textWidthRatio: textWidthRatio,
+                textHeightRatio: textHeightRatio,
+                textSpace: textSpace,
+                bold: bold,
+                underline: underline,
+                strikethrough: strikethrough,
+                italic: italic,
+                align: align),
+        autoOut: () => autoOut(id),
+        printQrCode: (data, {dot = 3, align = Align.center}) =>
+            printQrCode(id, data, dot: dot, align: align),
+        printTexts: (texts,
+                {columnWidths = const [], columnAligns = const []}) =>
+            printTexts(id, texts,
+                columnWidths: columnWidths, columnAligns: columnAligns),
+        addText: (text,
+                {textWidthRatio = 0,
+                textHeightRatio = 0,
+                textSpace = 0,
+                bold = false,
+                underline = false,
+                strikethrough = false,
+                italic = false,
+                align = Align.left}) =>
+            addText(id, text,
+                textWidthRatio: textWidthRatio,
+                textHeightRatio: textHeightRatio,
+                textSpace: textSpace,
+                bold: bold,
+                underline: underline,
+                strikethrough: strikethrough,
+                italic: italic,
+                align: align),
       );
       return printer;
     }).toList();
@@ -60,5 +105,69 @@ class SunmiPrinterX {
         }
       });
     });
+  }
+
+  Future<void> _setAlign(String printerId, Align align) {
+    return SunmiPrinterXPlatform.instance.setAlign(printerId, align);
+  }
+
+  Future<void> printText(String printerId, String text,
+      {int textWidthRatio = 0,
+      int textHeightRatio = 0,
+      int textSpace = 0,
+      bool bold = false,
+      bool underline = false,
+      bool strikethrough = false,
+      bool italic = false,
+      Align align = Align.left}) {
+    return SunmiPrinterXPlatform.instance.printText(
+      printerId,
+      text,
+      textWidthRatio: textWidthRatio,
+      textHeightRatio: textHeightRatio,
+      textSpace: textSpace,
+      bold: bold,
+      underline: underline,
+      strikethrough: strikethrough,
+      italic: italic,
+      align: align,
+    );
+  }
+
+  Future<void> autoOut(String printerId) {
+    return SunmiPrinterXPlatform.instance.autoOut(printerId);
+  }
+
+  Future<void> printQrCode(String printerId, String data,
+      {int dot = 3, Align align = Align.center}) {
+    return SunmiPrinterXPlatform.instance
+        .printQrCode(printerId, data, dot: dot, align: align);
+  }
+
+  Future<void> printTexts(String printerId, List<String> texts,
+      {List<int> columnWidths = const [],
+      List<Align> columnAligns = const []}) {
+    return SunmiPrinterXPlatform.instance.printTexts(printerId, texts,
+        columnWidths: columnWidths, columnAligns: columnAligns);
+  }
+
+  Future<void> addText(String printerId, String text,
+      {int textWidthRatio = 0,
+      int textHeightRatio = 0,
+      int textSpace = 0,
+      bool bold = false,
+      bool underline = false,
+      bool strikethrough = false,
+      bool italic = false,
+      Align align = Align.left}) {
+    return SunmiPrinterXPlatform.instance.addText(printerId, text,
+        textWidthRatio: textWidthRatio,
+        textHeightRatio: textHeightRatio,
+        textSpace: textSpace,
+        bold: bold,
+        underline: underline,
+        strikethrough: strikethrough,
+        italic: italic,
+        align: align);
   }
 }

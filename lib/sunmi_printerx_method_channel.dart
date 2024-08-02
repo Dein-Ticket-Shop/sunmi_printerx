@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
+import 'package:sunmi_printerx/align.dart';
 
 import 'sunmi_printerx_platform_interface.dart';
 
@@ -69,6 +70,92 @@ class MethodChannelSunmiPrinterX extends SunmiPrinterXPlatform {
         .invokeMethod<void>('printEscPosCommands', <String, dynamic>{
       'printerId': printerId,
       'commands': commands,
+    });
+  }
+
+  @override
+  Future<void> setAlign(String printerId, Align align) async {
+    await methodChannel.invokeMethod<void>('setAlign', <String, dynamic>{
+      'printerId': printerId,
+      'align': alignToString(align),
+    });
+  }
+
+  @override
+  Future<void> autoOut(String printerId) async {
+    await methodChannel.invokeMethod<void>('autoOut', <String, dynamic>{
+      'printerId': printerId,
+    });
+  }
+
+  @override
+  Future<void> printText(String printerId, String text,
+      {required int textWidthRatio,
+      required int textHeightRatio,
+      required int textSpace,
+      required bool bold,
+      required bool underline,
+      required bool strikethrough,
+      required bool italic,
+      required Align align}) async {
+    await methodChannel.invokeMethod<void>('printText', <String, dynamic>{
+      'printerId': printerId,
+      'text': text,
+      'textWidthRatio': textWidthRatio,
+      'textHeightRatio': textHeightRatio,
+      'textSpace': textSpace,
+      'bold': bold,
+      'underline': underline,
+      'strikethrough': strikethrough,
+      'italics': italic,
+      'align': alignToString(align),
+    });
+  }
+
+  @override
+  Future<void> printQrCode(String printerId, String data,
+      {required int dot, required Align align}) async {
+    await methodChannel.invokeMethod<void>('printQrCode', <String, dynamic>{
+      'printerId': printerId,
+      'data': data,
+      'dot': dot,
+      'align': alignToString(align),
+    });
+  }
+
+  @override
+  Future<void> printTexts(String printerId, List<String> texts,
+      {required List<int> columnWidths,
+      required List<Align> columnAligns}) async {
+    await methodChannel.invokeMethod<void>('printTexts', <String, dynamic>{
+      'printerId': printerId,
+      'texts': texts,
+      'colsWidthArrs': columnWidths,
+      'aligns': columnAligns.map(alignToString).toList(),
+    });
+  }
+
+  @override
+  Future<void> addText(String printerId, String text,
+      {required int textWidthRatio,
+      required int textHeightRatio,
+      required int textSpace,
+      required bool bold,
+      required bool underline,
+      required bool strikethrough,
+      required bool italic,
+      required Align align}) async {
+    await methodChannel.invokeMethod<void>('addText', <String, dynamic>{
+      'printerId': printerId,
+      'text': text,
+      'textWidthRatio': textWidthRatio,
+      'textHeightRatio': textHeightRatio,
+      'textSpace': textSpace,
+      'bold': bold,
+      'underline': underline,
+      'strikethrough': strikethrough,
+      'italics': italic,
+      'align': alignToString(align),
     });
   }
 }

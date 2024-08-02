@@ -4,6 +4,7 @@ import 'dart:async';
 import 'package:flutter/services.dart';
 import 'package:sunmi_printerx/printer.dart';
 import 'package:sunmi_printerx/sunmi_printerx.dart';
+import 'package:sunmi_printerx/align.dart' as align;
 import 'package:flutter_esc_pos_utils/flutter_esc_pos_utils.dart';
 
 void main() {
@@ -61,6 +62,50 @@ class _MyAppState extends State<MyApp> {
                   subtitle: Text(printer.status.toString()),
                   trailing: Wrap(
                     children: [
+                      TextButton(
+                          onPressed: () async {
+                            await printer.setAlign(align.Align.left);
+                            await printer.printText('!"§\$%&/()=? EUR €€€€€€ !',
+                                bold: true);
+                            await printer.setAlign(align.Align.center);
+                            await printer.printText('ÄÖÜäöüß');
+                            await printer.setAlign(align.Align.right);
+                            await printer.printText('Text Width Ratio 1!',
+                                underline: true, textWidthRatio: 1);
+                            await printer.setAlign(align.Align.left);
+                            await printer.printText('Text Height Ratio 1!',
+                                underline: true, textWidthRatio: 1);
+                            await printer.printText('Both Height Ratio 1!',
+                                textWidthRatio: 1, textHeightRatio: 1);
+                            await printer.printText('Spacing 3!', textSpace: 3);
+                            await printer.addText('Underlined ',
+                                underline: true);
+                            await printer.addText('Bold ', bold: true);
+                            await printer.addText('Striked\n',
+                                strikethrough: true);
+                            await printer.setAlign(align.Align.left);
+                            // https://pub.dev for 20 times
+                            await printer.printQrCode(
+                                List.filled(20, 'https://pub.dev').join(),
+                                dot: 5);
+
+                            await printer.printTexts([
+                              'col1',
+                              'col2',
+                              'col3',
+                            ], columnWidths: [
+                              3,
+                              6,
+                              3
+                            ], columnAligns: [
+                              align.Align.left,
+                              align.Align.center,
+                              align.Align.right
+                            ]);
+
+                            await printer.autoOut();
+                          },
+                          child: const Text('Print SDK')),
                       TextButton(
                           onPressed: () async {
                             final profile = await CapabilityProfile.load();
@@ -141,7 +186,7 @@ class _MyAppState extends State<MyApp> {
                             await printer
                                 .printEscPosCommands(Uint8List.fromList(bytes));
                           },
-                          child: const Text('Print test')),
+                          child: const Text('Print ESC/POS')),
                       TextButton(
                           onPressed: () async {
                             await printer.openCashDrawer();
