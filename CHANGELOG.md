@@ -1,3 +1,7 @@
+## 1.2.1 (2025-04-12)
+
+-   Fixed a bug where the alarm lamp would not always work
+
 ## 1.2.0 (2025-04-12)
 
 -   Add `setAlarmLampColorStatic`, `setAlarmLampColorBlinking`, `setAlarmLampsOff` methods
