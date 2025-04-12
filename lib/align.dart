@@ -12,8 +12,6 @@ String alignToString(Align align) {
       return 'CENTER';
     case Align.right:
       return 'RIGHT';
-    default:
-      throw Exception('Unknown align: $align');
   }
 }
 
