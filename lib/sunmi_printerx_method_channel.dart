@@ -158,4 +158,29 @@ class MethodChannelSunmiPrinterX extends SunmiPrinterXPlatform {
       'align': alignToString(align),
     });
   }
+
+  @override
+  Future<void> controlLamp(int status, String lamp) {
+    return methodChannel.invokeMethod<void>('controlLamp', <String, dynamic>{
+      'status': status,
+      'lamp': lamp,
+    });
+  }
+
+  @override
+  Future<void> controlLampForLoops(
+      int status, int onTime, int offTime, List<String> lamps) {
+    return methodChannel
+        .invokeMethod<void>('controlLampForLoops', <String, dynamic>{
+      'status': status,
+      'onTime': onTime,
+      'offTime': offTime,
+      'lamps': lamps,
+    });
+  }
+
+  @override
+  Future<void> lampsOff() {
+    return methodChannel.invokeMethod<void>('lampsOff');
+  }
 }

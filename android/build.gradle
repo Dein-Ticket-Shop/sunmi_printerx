@@ -22,9 +22,16 @@ rootProject.allprojects {
 apply plugin: "com.android.library"
 
 android {
+    buildFeatures {
+        aidl true
+    }
     if (project.android.hasProperty("namespace")) {
         namespace = "com.deinticketshop.sunmi_printerx"
     }
+
+
+    aidlPackageWhiteList "src/main/aidl/com/sunmi/statuslampmanager/IStateLamp.aidl"
+
 
     compileSdk = 34
 

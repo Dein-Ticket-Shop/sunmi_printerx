@@ -1,6 +1,9 @@
 package com.deinticketshop.sunmi_printerx;
 
+import android.content.ComponentName;
 import android.content.Context;
+import android.content.ServiceConnection;
+import android.os.IBinder;
 import android.os.RemoteException;
 
 import androidx.annotation.NonNull;
@@ -26,6 +29,12 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
+import com.sunmi.statuslampmanager.IStateLamp;
+import android.content.Intent;
+import android.util.Log;
+import android.app.Service;
+import android.content.Context;
+
 /**
  * SunmiPrinterXPlugin
  */
@@ -38,16 +47,52 @@ public class SunmiPrinterXPlugin implements FlutterPlugin, MethodCallHandler {
     /// when the Flutter Engine is detached from the Activity
     private MethodChannel channel;
 
+    private IStateLamp mService;
+    private ServiceConnection con = new ServiceConnection() {
+
+        @Override
+        public void onServiceConnected(ComponentName name, IBinder service) {
+            mService = IStateLamp.Stub.asInterface(service);
+            Log.d("darren", "Service Connected.");
+
+            synchronized (servicePendingTasks) {
+                for (Runnable task : servicePendingTasks) {
+                    new Thread(task).start();
+                }
+                servicePendingTasks.clear();
+            }
+        }
+
+        @Override
+        public void onServiceDisconnected(ComponentName name) {
+            Log.d("darren", "Service Disconnected.");
+            System.out.println("Service disconnected");
+            mService = null;
+        }
+    };
+
     Context context;
 
     @Override
     public void onAttachedToEngine(@NonNull FlutterPluginBinding flutterPluginBinding) {
+        System.out.println("Attached to engine");
         channel = new MethodChannel(flutterPluginBinding.getBinaryMessenger(), "sunmi_printerx");
         channel.setMethodCallHandler(this);
         context = flutterPluginBinding.getApplicationContext();
+
+        connectToLampService();
+    }
+
+    private void connectToLampService() {
+        Intent intent = new Intent();
+        System.out.println("Starting service");
+        intent.setPackage("com.sunmi.statuslampmanager");
+        intent.setAction("com.sunmi.statuslamp.service");
+        context.bindService(intent, con, 0);
     }
 
     HashMap<String, PrinterSdk.Printer> printers = new HashMap<>();
+    private final List<Runnable> servicePendingTasks = new ArrayList<>();
 
     @Override
     public void onMethodCall(@NonNull MethodCall call, @NonNull Result result) {
@@ -264,6 +309,86 @@ public class SunmiPrinterXPlugin implements FlutterPlugin, MethodCallHandler {
                 }).start();
                 break;
             }
+
+            case "controlLamp": {
+                Runnable task = new Runnable() {
+                    @Override
+                    public void run() {
+                        try {
+                            System.out.println("controlLamp");
+                            mService.controlLamp(Integer.parseInt(call.argument("status").toString()), call.argument("lamp").toString());
+                            result.success(true);
+                        } catch (RemoteException e) {
+                            e.printStackTrace();
+                            result.error("ERROR", e.getMessage(), null);
+                        }
+                    }
+                };
+
+                if (mService == null) {
+                    synchronized (servicePendingTasks) {
+                        servicePendingTasks.add(task);
+                    }
+                    connectToLampService();
+                } else {
+                    new Thread(task).start();
+                }
+                break;
+            }
+            case "controlLampForLoops": {
+                Runnable task = new Runnable() {
+                    @Override
+                    public void run() {
+                        try {
+                            System.out.println("controlLampForLoops");
+                            mService.controlLampForLoops(
+                                    Integer.parseInt(call.argument("status").toString()),
+                                    Integer.parseInt(call.argument("onTime").toString()),
+                                    Integer.parseInt(call.argument("offTime").toString()),
+                                    ((ArrayList<String>) call.argument("lamps")).toArray(new String[0]));
+                            result.success(true);
+                        } catch (RemoteException e) {
+                            e.printStackTrace();
+                            result.error("ERROR", e.getMessage(), null);
+                        }
+                    }
+                };
+
+                if (mService == null) {
+                    synchronized (servicePendingTasks) {
+                        servicePendingTasks.add(task);
+                    }
+                    connectToLampService();
+                } else {
+                    new Thread(task).start();
+                }
+                break;
+            }
+            case "lampsOff": {
+                Runnable task = new Runnable() {
+                    @Override
+                    public void run() {
+                        try {
+                            System.out.println("lampsOff");
+                            mService.closeAllLamp();
+                            result.success(true);
+                        } catch (RemoteException e) {
+                            e.printStackTrace();
+                            result.error("ERROR", e.getMessage(), null);
+                        }
+                    }
+                };
+
+                if (mService == null) {
+                    synchronized (servicePendingTasks) {
+                        servicePendingTasks.add(task);
+                    }
+                    connectToLampService();
+                } else {
+                    new Thread(task).start();
+                }
+                break;
+            }
             default:
                 result.notImplemented();
                 break;
@@ -272,13 +397,13 @@ public class SunmiPrinterXPlugin implements FlutterPlugin, MethodCallHandler {
 
     private static TextStyle getTextStyle(MethodCall call) {
         return TextStyle.getStyle()
-        .setTextWidthRatio(Integer.parseInt(call.argument("textWidthRatio").toString()))
-        .setTextHeightRatio(Integer.parseInt(call.argument("textHeightRatio").toString()))
-        .setTextSpace(Integer.parseInt(call.argument("textSpace").toString()))
-        .enableBold(Boolean.parseBoolean(call.argument("bold").toString()))
-        .enableUnderline(Boolean.parseBoolean(call.argument("underline").toString()))
-        .enableStrikethrough(Boolean.parseBoolean(call.argument("strikethrough").toString()))
-        .enableItalics(Boolean.parseBoolean(call.argument("italics").toString()));
+                .setTextWidthRatio(Integer.parseInt(call.argument("textWidthRatio").toString()))
+                .setTextHeightRatio(Integer.parseInt(call.argument("textHeightRatio").toString()))
+                .setTextSpace(Integer.parseInt(call.argument("textSpace").toString()))
+                .enableBold(Boolean.parseBoolean(call.argument("bold").toString()))
+                .enableUnderline(Boolean.parseBoolean(call.argument("underline").toString()))
+                .enableStrikethrough(Boolean.parseBoolean(call.argument("strikethrough").toString()))
+                .enableItalics(Boolean.parseBoolean(call.argument("italics").toString()));
     }
 
     private PrinterSdk.Printer getPrinter(MethodCall call) {
@@ -288,5 +413,11 @@ public class SunmiPrinterXPlugin implements FlutterPlugin, MethodCallHandler {
     @Override
     public void onDetachedFromEngine(@NonNull FlutterPluginBinding binding) {
         channel.setMethodCallHandler(null);
+        try {
+            mService.closeAllLamp();
+            context.unbindService(con);
+        } catch (RemoteException e) {
+            e.printStackTrace();
+        }
     }
 }

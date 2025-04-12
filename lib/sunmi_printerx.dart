@@ -1,5 +1,5 @@
 import 'dart:typed_data';
-
+import 'package:sunmi_printerx/alarm_lamp_color.dart';
 import 'package:sunmi_printerx/align.dart';
 import 'package:sunmi_printerx/printer.dart';
 import 'package:sunmi_printerx/printerstatus.dart';
@@ -169,5 +169,33 @@ class SunmiPrinterX {
         strikethrough: strikethrough,
         italic: italic,
         align: align);
+  }
+
+  Future<void> _setAlarmLampStatic(String lamp, bool on) async {
+    await SunmiPrinterXPlatform.instance.controlLamp(on ? 0 : 1, lamp);
+  }
+
+  Future<void> setAlarmLampColorStatic(AlarmLampColor color) async {
+    await setAlarmLampsOff();
+    for (String lamp in alarmLampColorToLEDs(color)) {
+      await _setAlarmLampStatic(lamp, true);
+    }
+  }
+
+  Future<void> _setAlarmLampsBlinking(
+      int status, int onTime, int offTime, List<String> lamps) {
+    return SunmiPrinterXPlatform.instance
+        .controlLampForLoops(status, onTime, offTime, lamps);
+  }
+
+  Future<void> setAlarmLampColorBlinking(
+      AlarmLampColor color, int onTime, int offTime) async {
+    await setAlarmLampsOff();
+    await _setAlarmLampsBlinking(
+        0, onTime, offTime, alarmLampColorToLEDs(color));
+  }
+
+  Future<void> setAlarmLampsOff() async {
+    await SunmiPrinterXPlatform.instance.lampsOff();
   }
 }

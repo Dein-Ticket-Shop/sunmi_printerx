@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'dart:async';
 
 import 'package:flutter/services.dart';
+import 'package:sunmi_printerx/alarm_lamp_color.dart';
 import 'package:sunmi_printerx/printer.dart';
 import 'package:sunmi_printerx/sunmi_printerx.dart';
 import 'package:sunmi_printerx/align.dart' as align;
@@ -216,6 +217,36 @@ class _MyAppState extends State<MyApp> {
                 ),
               TextButton(
                   onPressed: initDefaultPrinter, child: const Text('Refresh')),
+              for (final color in AlarmLampColor.values)
+                TextButton(
+                    onPressed: () {
+                      _sunmiPrinterXPlugin.setAlarmLampColorStatic(color);
+                    },
+                    style: TextButton.styleFrom(
+                      backgroundColor: {
+                        AlarmLampColor.red: Colors.red,
+                        AlarmLampColor.green: Colors.green,
+                        AlarmLampColor.blue: Colors.blue,
+                        AlarmLampColor.white: Colors.white,
+                        AlarmLampColor.yellow: Colors.yellow,
+                        AlarmLampColor.purple: Colors.purple,
+                        AlarmLampColor.cyan: Colors.cyan,
+                      }[color],
+                    ),
+                    child: Text(
+                      'Alarm Lamp ${color.name}',
+                    )),
+              TextButton(
+                  onPressed: () {
+                    _sunmiPrinterXPlugin.setAlarmLampsOff();
+                  },
+                  child: const Text('Alarm Lamps Off')),
+              TextButton(
+                  onPressed: () {
+                    _sunmiPrinterXPlugin.setAlarmLampColorBlinking(
+                        AlarmLampColor.yellow, 200, 200);
+                  },
+                  child: const Text('Alarm Lamps Blinking')),
             ],
           ),
         ));

@@ -87,4 +87,17 @@ abstract class SunmiPrinterXPlatform extends PlatformInterface {
       required Align align}) {
     throw UnimplementedError('addText() has not been implemented.');
   }
+
+  Future<void> controlLamp(int status, String lamp) {
+    throw UnimplementedError('controlLamp() has not been implemented.');
+  }
+
+  Future<void> controlLampForLoops(
+      int status, int onTime, int offTime, List<String> lamps) {
+    throw UnimplementedError('controlLampForLoops() has not been implemented.');
+  }
+
+  Future<void> lampsOff() {
+    throw UnimplementedError('lampsOff() has not been implemented.');
+  }
 }
