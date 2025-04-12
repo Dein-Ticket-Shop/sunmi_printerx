@@ -88,7 +88,7 @@ public class SunmiPrinterXPlugin implements FlutterPlugin, MethodCallHandler {
         System.out.println("Starting service");
         intent.setPackage("com.sunmi.statuslampmanager");
         intent.setAction("com.sunmi.statuslamp.service");
-        context.bindService(intent, con, 0);
+        context.bindService(intent, con, Context.BIND_AUTO_CREATE);
     }
 
     HashMap<String, PrinterSdk.Printer> printers = new HashMap<>();
