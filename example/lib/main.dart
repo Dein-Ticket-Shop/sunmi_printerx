@@ -24,6 +24,8 @@ class _MyAppState extends State<MyApp> {
   Map<String, bool> cashDrawerOpen = {};
   final _sunmiPrinterXPlugin = SunmiPrinterX();
   final _messangerKey = GlobalKey<ScaffoldMessengerState>();
+  PrinterStatusBroadcastSubscription? _broadcastSubscription;
+  String _lastBroadcastEvent = '';
 
   @override
   void initState() {
@@ -247,6 +249,111 @@ class _MyAppState extends State<MyApp> {
                         AlarmLampColor.yellow, 200, 200);
                   },
                   child: const Text('Alarm Lamps Blinking')),
+              TextButton(
+                  onPressed: () async {
+                    // Subscribe to printer status broadcasts
+                    _broadcastSubscription?.cancel();
+                    _broadcastSubscription = _sunmiPrinterXPlugin
+                        .subscribeToPrinterStatusBroadcasts((action, data) {
+                      setState(() {
+                        _lastBroadcastEvent = 'Action: '
+                            '${action} Data: ${data?.toString() ?? ''}';
+                      });
+                      _messangerKey.currentState?.showSnackBar(
+                        SnackBar(content: Text(_lastBroadcastEvent)),
+                      );
+                    });
+                  },
+                  child: const Text('Subscribe to Printer Status Broadcasts')),
+              TextButton(
+                  onPressed: () async {
+                    // Cancel broadcast subscription
+                    await _broadcastSubscription?.cancel();
+                    setState(() {
+                      _lastBroadcastEvent = 'Subscription cancelled.';
+                    });
+                    _messangerKey.currentState?.showSnackBar(
+                      SnackBar(content: Text(_lastBroadcastEvent)),
+                    );
+                  },
+                  child: const Text('Cancel Broadcast Subscription')),
+              TextButton(
+                  onPressed: () async {
+                    if (printers.isEmpty) return;
+                    final printer = printers.first;
+                    final id =
+                        await _sunmiPrinterXPlugin.getPrinterId(printer.id);
+                    _messangerKey.currentState?.showSnackBar(
+                      SnackBar(content: Text('Printer ID: $id')),
+                    );
+                  },
+                  child: const Text('Show Printer ID')),
+              TextButton(
+                  onPressed: () async {
+                    if (printers.isEmpty) return;
+                    final printer = printers.first;
+                    final version = await _sunmiPrinterXPlugin
+                        .getPrinterVersion(printer.id);
+                    _messangerKey.currentState?.showSnackBar(
+                      SnackBar(content: Text('Printer Version: $version')),
+                    );
+                  },
+                  child: const Text('Show Printer Version')),
+              TextButton(
+                  onPressed: () async {
+                    if (printers.isEmpty) return;
+                    final printer = printers.first;
+                    final type =
+                        await _sunmiPrinterXPlugin.getPrinterType(printer.id);
+                    _messangerKey.currentState?.showSnackBar(
+                      SnackBar(content: Text('Printer Type: $type')),
+                    );
+                  },
+                  child: const Text('Show Printer Type')),
+              TextButton(
+                  onPressed: () async {
+                    if (printers.isEmpty) return;
+                    final printer = printers.first;
+                    final cutter =
+                        await _sunmiPrinterXPlugin.getCutterNumber(printer.id);
+                    _messangerKey.currentState?.showSnackBar(
+                      SnackBar(content: Text('Cutter Number: $cutter')),
+                    );
+                  },
+                  child: const Text('Show Cutter Number')),
+              TextButton(
+                  onPressed: () async {
+                    if (printers.isEmpty) return;
+                    final printer = printers.first;
+                    final distance = await _sunmiPrinterXPlugin
+                        .getPrintedDistance(printer.id);
+                    _messangerKey.currentState?.showSnackBar(
+                      SnackBar(content: Text('Printed Distance: $distance')),
+                    );
+                  },
+                  child: const Text('Show Printed Distance')),
+              TextButton(
+                  onPressed: () async {
+                    if (printers.isEmpty) return;
+                    final printer = printers.first;
+                    final hot = await _sunmiPrinterXPlugin
+                        .getPrinterHotTimes(printer.id);
+                    _messangerKey.currentState?.showSnackBar(
+                      SnackBar(content: Text('Printer Hot Times: $hot')),
+                    );
+                  },
+                  child: const Text('Show Printer Hot Times')),
+              TextButton(
+                  onPressed: () async {
+                    if (printers.isEmpty) return;
+                    final printer = printers.first;
+                    final density = await _sunmiPrinterXPlugin
+                        .getPrinterDensity(printer.id);
+                    _messangerKey.currentState?.showSnackBar(
+                      SnackBar(content: Text('Printer Density: $density')),
+                    );
+                  },
+                  child: const Text('Show Printer Density')),
             ],
           ),
         ));
