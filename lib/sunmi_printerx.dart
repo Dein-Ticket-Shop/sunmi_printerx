@@ -1,8 +1,10 @@
 import 'dart:typed_data';
+import 'dart:async';
 import 'package:sunmi_printerx/alarm_lamp_color.dart';
 import 'package:sunmi_printerx/align.dart';
 import 'package:sunmi_printerx/printer.dart';
 import 'package:sunmi_printerx/printerstatus.dart';
+import 'package:flutter_broadcasts/flutter_broadcasts.dart';
 
 import 'sunmi_printerx_platform_interface.dart';
 
@@ -32,7 +34,101 @@ SunmiPrinterType sunmiPrinterTypeFromString(String? type) {
   }
 }
 
+/// Enum for all printer status broadcast actions.
+enum PrinterStatusAction {
+  normal,
+  outOfPaper,
+  paperError,
+  overHeating,
+  motorHeating,
+  coverOpen,
+  coverError,
+  knifeError1,
+  knifeError2,
+  blackLabelNonExistent,
+  labelNonExistent,
+  error,
+  pickPaper,
+  lessOfPaper,
+  printerNonExistent,
+}
+
+/// Maps enum to broadcast action string.
+const Map<PrinterStatusAction, String> printerStatusActionToString = {
+  PrinterStatusAction.normal: 'woyou.aidlservice.jiuv5.NORMAL_ACTION',
+  PrinterStatusAction.outOfPaper: 'woyou.aidlservice.jiuv5.OUT_OF_PAPER_ACTION',
+  PrinterStatusAction.paperError: 'woyou.aidlservice.jiuv5.PAPER_ERROR_ACTION',
+  PrinterStatusAction.overHeating:
+      'woyou.aidlservice.jiuv5.OVER_HEATING_ACTION',
+  PrinterStatusAction.motorHeating:
+      'woyou.aidlservice.jiuv5.MOTOR_HEATING_ACTION',
+  PrinterStatusAction.coverOpen: 'woyou.aidlservice.jiuv5.COVER_OPEN_ACTION',
+  PrinterStatusAction.coverError: 'woyou.aidlservice.jiuv5.COVER_ERROR_ACTION',
+  PrinterStatusAction.knifeError1:
+      'woyou.aidlservice.jiuv5.KNIFE_ERROR_ACTION_1',
+  PrinterStatusAction.knifeError2:
+      'woyou.aidlservice.jiuv5.KNIFE_ERROR_ACTION_2',
+  PrinterStatusAction.blackLabelNonExistent:
+      'woyou.aidlservice.jiuv5.BLACKLABEL_NON_EXISTENT_ACTION',
+  PrinterStatusAction.labelNonExistent:
+      'woyou.aidlservice.jiuv5.LABEL_NON_EXISTENT_ACTION',
+  PrinterStatusAction.error: 'woyou.aidlservice.jiuv5.ERROR_ACTION',
+  PrinterStatusAction.pickPaper: 'woyou.aidlservice.jiuv5.PICK_PAPER_ACTION',
+  PrinterStatusAction.lessOfPaper:
+      'woyou.aidlservice.jiuv5.LESS_OF_PAPER_ACTION',
+  PrinterStatusAction.printerNonExistent:
+      'woyou.aidlservice.jiuv5.PRINTER_NON_EXISTENT_ACTION',
+};
+
+/// Maps broadcast action string to enum.
+final Map<String, PrinterStatusAction> printerStatusActionFromString =
+    printerStatusActionToString.map((k, v) => MapEntry(v, k));
+
+/// Represents a subscription to printer status broadcasts.
+/// Call [cancel] to stop listening and [receiver.stop()] for full cleanup.
+class PrinterStatusBroadcastSubscription {
+  final StreamSubscription subscription;
+  final BroadcastReceiver receiver;
+  PrinterStatusBroadcastSubscription(this.subscription, this.receiver);
+  Future<void> cancel() async {
+    await subscription.cancel();
+    receiver.stop();
+  }
+}
+
 class SunmiPrinterX {
+  /// List of broadcast actions for printer status events (as enum)
+  static const List<PrinterStatusAction> printerStatusActions =
+      PrinterStatusAction.values;
+
+  /// List of broadcast action strings for receiver
+  static List<String> get _printerStatusActions =>
+      printerStatusActions.map((e) => printerStatusActionToString[e]!).toList();
+
+  /// Starts listening to printer status broadcasts.
+  ///
+  /// [onEvent] is called with the broadcast action and its data whenever a printer status event occurs.
+  /// Returns a [PrinterStatusBroadcastSubscription] so you can cancel and clean up when needed.
+  ///
+  /// Example:
+  /// ```dart
+  /// final sub = sunmiPrinterX.subscribeToPrinterStatusBroadcasts((action, data) {
+  ///   print('Printer status event: action=$action, data=$data');
+  /// });
+  /// // To cancel and clean up:
+  /// await sub.cancel();
+  /// ```
+  PrinterStatusBroadcastSubscription subscribeToPrinterStatusBroadcasts(
+    void Function(String action, Map<String, dynamic>? data) onEvent,
+  ) {
+    final receiver = BroadcastReceiver(names: _printerStatusActions);
+    final subscription = receiver.messages.listen((event) {
+      onEvent(event.name, event.data);
+    });
+    receiver.start();
+    return PrinterStatusBroadcastSubscription(subscription, receiver);
+  }
+
   Future<List<Printer>> getPrinters() async {
     return (await SunmiPrinterXPlatform.instance.getPrinters())
         .map((printerData) {
