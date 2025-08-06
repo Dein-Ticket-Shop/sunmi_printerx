@@ -389,6 +389,23 @@ public class SunmiPrinterXPlugin implements FlutterPlugin, MethodCallHandler {
                 }
                 break;
             }
+            case "getInfo": {
+                new Thread(new Runnable() {
+                    @Override
+                    public void run() {
+                        try {
+                            String infoType = call.argument("infoType");
+                            PrinterInfo info = PrinterInfo.valueOf(infoType);
+                            String value = getPrinter(call).queryApi().getInfo(info);
+                            result.success(value);
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                            result.error("ERROR", e.getMessage(), null);
+                        }
+                    }
+                }).start();
+                break;
+            }
             default:
                 result.notImplemented();
                 break;

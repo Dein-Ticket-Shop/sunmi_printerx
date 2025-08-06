@@ -100,4 +100,8 @@ abstract class SunmiPrinterXPlatform extends PlatformInterface {
   Future<void> lampsOff() {
     throw UnimplementedError('lampsOff() has not been implemented.');
   }
+
+  Future<String> getInfo(String printerId, String infoType) {
+    throw UnimplementedError('getInfo() has not been implemented.');
+  }
 }

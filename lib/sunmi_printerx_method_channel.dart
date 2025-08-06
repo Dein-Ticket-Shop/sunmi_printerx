@@ -183,4 +183,20 @@ class MethodChannelSunmiPrinterX extends SunmiPrinterXPlatform {
   Future<void> lampsOff() {
     return methodChannel.invokeMethod<void>('lampsOff');
   }
+
+  @override
+  Future<String> getInfo(String printerId, String infoType) async {
+    final result =
+        await methodChannel.invokeMethod<String>('getInfo', <String, dynamic>{
+      'printerId': printerId,
+      'infoType': infoType,
+    });
+    if (result == null) {
+      throw PlatformException(
+        code: 'UNKNOWN',
+        message: 'Unable to get info $infoType.',
+      );
+    }
+    return result;
+  }
 }

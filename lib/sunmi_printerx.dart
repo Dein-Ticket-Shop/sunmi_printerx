@@ -6,6 +6,32 @@ import 'package:sunmi_printerx/printerstatus.dart';
 
 import 'sunmi_printerx_platform_interface.dart';
 
+enum SunmiPrinterType {
+  generalThermal,
+  blackMarkThermal,
+  thermalLabel,
+  stylus,
+  laser,
+  unknown,
+}
+
+SunmiPrinterType sunmiPrinterTypeFromString(String? type) {
+  switch (type) {
+    case '0':
+      return SunmiPrinterType.generalThermal;
+    case '1':
+      return SunmiPrinterType.blackMarkThermal;
+    case '2':
+      return SunmiPrinterType.thermalLabel;
+    case '3':
+      return SunmiPrinterType.stylus;
+    case '4':
+      return SunmiPrinterType.laser;
+    default:
+      return SunmiPrinterType.unknown;
+  }
+}
+
 class SunmiPrinterX {
   Future<List<Printer>> getPrinters() async {
     return (await SunmiPrinterXPlatform.instance.getPrinters())
@@ -197,5 +223,39 @@ class SunmiPrinterX {
 
   Future<void> setAlarmLampsOff() async {
     await SunmiPrinterXPlatform.instance.lampsOff();
+  }
+
+  Future<String> getPrinterId(String printerId) =>
+      SunmiPrinterXPlatform.instance.getInfo(printerId, 'ID');
+  Future<String> getPrinterVersion(String printerId) =>
+      SunmiPrinterXPlatform.instance.getInfo(printerId, 'VERSION');
+  Future<SunmiPrinterType> getPrinterType(String printerId) async {
+    final typeStr =
+        await SunmiPrinterXPlatform.instance.getInfo(printerId, 'TYPE');
+    return sunmiPrinterTypeFromString(typeStr);
+  }
+
+  Future<int> getCutterNumber(String printerId) async {
+    final value =
+        await SunmiPrinterXPlatform.instance.getInfo(printerId, 'CUTTER');
+    return int.tryParse(value) ?? 0;
+  }
+
+  Future<int> getPrintedDistance(String printerId) async {
+    final value =
+        await SunmiPrinterXPlatform.instance.getInfo(printerId, 'DISTANCE');
+    return int.tryParse(value) ?? 0;
+  }
+
+  Future<int> getPrinterHotTimes(String printerId) async {
+    final value =
+        await SunmiPrinterXPlatform.instance.getInfo(printerId, 'HOT');
+    return int.tryParse(value) ?? 0;
+  }
+
+  Future<int> getPrinterDensity(String printerId) async {
+    final value =
+        await SunmiPrinterXPlatform.instance.getInfo(printerId, 'DENSITY');
+    return int.tryParse(value) ?? 0;
   }
 }
