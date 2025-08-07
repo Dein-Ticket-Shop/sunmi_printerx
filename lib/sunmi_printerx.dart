@@ -19,15 +19,15 @@ enum SunmiPrinterType {
 
 SunmiPrinterType sunmiPrinterTypeFromString(String? type) {
   switch (type) {
-    case '0':
+    case 'thermal printer':
       return SunmiPrinterType.generalThermal;
-    case '1':
+    case 'black mark thermal printer':
       return SunmiPrinterType.blackMarkThermal;
-    case '2':
+    case 'thermal label printer':
       return SunmiPrinterType.thermalLabel;
-    case '3':
+    case 'stylus printer':
       return SunmiPrinterType.stylus;
-    case '4':
+    case 'laser printer':
       return SunmiPrinterType.laser;
     default:
       return SunmiPrinterType.unknown;
@@ -328,6 +328,7 @@ class SunmiPrinterX {
   Future<SunmiPrinterType> getPrinterType(String printerId) async {
     final typeStr =
         await SunmiPrinterXPlatform.instance.getInfo(printerId, 'TYPE');
+    print('Printer type: $typeStr');
     return sunmiPrinterTypeFromString(typeStr);
   }
 
