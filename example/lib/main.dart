@@ -246,17 +246,22 @@ class _MyAppState extends State<MyApp> {
                                         child: const Text('Print ESC/POS')),
                                     TextButton(
                                         onPressed: () async {
-                                          await printer.openCashDrawer();
-                                          setState(() {
-                                            cashDrawerOpen[printer.id] = true;
-                                          });
-                                          _showSnackBar("Cash drawer opened");
-                                          await printer
-                                              .waitForCashDrawerClose();
-                                          setState(() {
-                                            cashDrawerOpen[printer.id] = false;
-                                          });
-                                          _showSnackBar("Cash drawer closed");
+                                          try {
+                                            await printer.openCashDrawer();
+                                            setState(() {
+                                              cashDrawerOpen[printer.id] = true;
+                                            });
+                                            _showSnackBar("Cash drawer opened");
+                                            await printer
+                                                .waitForCashDrawerClose();
+                                            setState(() {
+                                              cashDrawerOpen[printer.id] =
+                                                  false;
+                                            });
+                                            _showSnackBar("Cash drawer closed");
+                                          } catch (e) {
+                                            _showSnackBar('Error: $e');
+                                          }
                                         },
                                         child: const Text('Open cash drawer')),
                                     TextButton(
