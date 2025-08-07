@@ -66,7 +66,6 @@ public class SunmiPrinterXPlugin implements FlutterPlugin, MethodCallHandler {
         @Override
         public void onServiceDisconnected(ComponentName name) {
             Log.d("darren", "Service Disconnected.");
-            System.out.println("Service disconnected");
             mService = null;
         }
     };
@@ -75,7 +74,6 @@ public class SunmiPrinterXPlugin implements FlutterPlugin, MethodCallHandler {
 
     @Override
     public void onAttachedToEngine(@NonNull FlutterPluginBinding flutterPluginBinding) {
-        System.out.println("Attached to engine");
         channel = new MethodChannel(flutterPluginBinding.getBinaryMessenger(), "sunmi_printerx");
         channel.setMethodCallHandler(this);
         context = flutterPluginBinding.getApplicationContext();
@@ -85,7 +83,6 @@ public class SunmiPrinterXPlugin implements FlutterPlugin, MethodCallHandler {
 
     private void connectToLampService() {
         Intent intent = new Intent();
-        System.out.println("Starting service");
         intent.setPackage("com.sunmi.statuslampmanager");
         intent.setAction("com.sunmi.statuslamp.service");
         context.bindService(intent, con, Context.BIND_AUTO_CREATE);
@@ -315,7 +312,6 @@ public class SunmiPrinterXPlugin implements FlutterPlugin, MethodCallHandler {
                     @Override
                     public void run() {
                         try {
-                            System.out.println("controlLamp");
                             mService.controlLamp(Integer.parseInt(call.argument("status").toString()), call.argument("lamp").toString());
                             result.success(true);
                         } catch (RemoteException e) {
@@ -340,7 +336,6 @@ public class SunmiPrinterXPlugin implements FlutterPlugin, MethodCallHandler {
                     @Override
                     public void run() {
                         try {
-                            System.out.println("controlLampForLoops");
                             mService.controlLampForLoops(
                                     Integer.parseInt(call.argument("status").toString()),
                                     Integer.parseInt(call.argument("onTime").toString()),
@@ -369,7 +364,6 @@ public class SunmiPrinterXPlugin implements FlutterPlugin, MethodCallHandler {
                     @Override
                     public void run() {
                         try {
-                            System.out.println("lampsOff");
                             mService.closeAllLamp();
                             result.success(true);
                         } catch (RemoteException e) {
