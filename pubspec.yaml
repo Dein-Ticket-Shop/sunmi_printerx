@@ -10,7 +10,9 @@ environment:
 dependencies:
     flutter:
         sdk: flutter
-    flutter_broadcasts: ^0.4.0
+    flutter_broadcasts:
+        git:
+            url: https://github.com/Dein-Ticket-Shop/flutter_broadcasts
     plugin_platform_interface: ^2.0.2
 
 dev_dependencies:

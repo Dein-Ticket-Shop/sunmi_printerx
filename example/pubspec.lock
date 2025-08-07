@@ -105,10 +105,11 @@ packages:
   flutter_broadcasts:
     dependency: transitive
     description:
-      name: flutter_broadcasts
-      sha256: "9e76eeeda4a9faef63e3b08af5664c79219a2eabffc8ce95296858ea70423b1e"
-      url: "https://pub.dev"
-    source: hosted
+      path: "."
+      ref: HEAD
+      resolved-ref: "6365e14d49f7db63a2bbffc0d8c6503246f78244"
+      url: "https://github.com/Dein-Ticket-Shop/flutter_broadcasts"
+    source: git
     version: "0.4.0"
   flutter_driver:
     dependency: transitive
