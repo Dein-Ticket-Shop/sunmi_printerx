@@ -328,7 +328,6 @@ class SunmiPrinterX {
   Future<SunmiPrinterType> getPrinterType(String printerId) async {
     final typeStr =
         await SunmiPrinterXPlatform.instance.getInfo(printerId, 'TYPE');
-    print('Printer type: $typeStr');
     return sunmiPrinterTypeFromString(typeStr);
   }
 
