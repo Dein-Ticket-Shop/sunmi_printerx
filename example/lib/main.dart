@@ -81,9 +81,9 @@ class _MyAppState extends State<MyApp> {
                               style: TextStyle(
                                   fontSize: 18, fontWeight: FontWeight.bold)),
                           ...printers.map((printer) => ListTile(
-                                title: Text(
-                                    "Printer: ${printer.name} (Cash drawer: ${cashDrawerOpen[printer.id] == true ? 'open' : 'closed'})"),
-                                subtitle: Text(printer.status.toString()),
+                                title: Text("\"${printer.name}\""),
+                                subtitle: Text(
+                                    "Status: ${printer.status.toString()}\nCash drawer: ${cashDrawerOpen[printer.id] == true ? 'open' : 'closed'}"),
                                 trailing: Wrap(
                                   spacing: 8,
                                   children: [
@@ -333,7 +333,7 @@ class _MyAppState extends State<MyApp> {
                       ),
                     ),
                   ),
-                  // Info & Broadcasts
+                  // Info Card
                   Card(
                     margin: const EdgeInsets.only(bottom: 12),
                     child: Padding(
@@ -341,106 +341,162 @@ class _MyAppState extends State<MyApp> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          const Text('Printer Info & Broadcasts',
+                          const Text('Printer Info',
                               style: TextStyle(
                                   fontSize: 18, fontWeight: FontWeight.bold)),
                           Wrap(
                             spacing: 8,
                             runSpacing: 8,
                             children: [
-                              TextButton(
-                                  onPressed: () async {
-                                    if (printers.isEmpty) return;
-                                    final printer = printers.first;
-                                    final id = await _sunmiPrinterXPlugin
-                                        .getPrinterId(printer.id);
-                                    _showSnackBar('Printer ID: $id');
-                                  },
-                                  child: const Text('Show Printer ID')),
-                              TextButton(
-                                  onPressed: () async {
-                                    if (printers.isEmpty) return;
-                                    final printer = printers.first;
-                                    final version = await _sunmiPrinterXPlugin
-                                        .getPrinterVersion(printer.id);
-                                    _showSnackBar('Printer Version: $version');
-                                  },
-                                  child: const Text('Show Printer Version')),
-                              TextButton(
-                                  onPressed: () async {
-                                    if (printers.isEmpty) return;
-                                    final printer = printers.first;
-                                    final type = await _sunmiPrinterXPlugin
-                                        .getPrinterType(printer.id);
-                                    _showSnackBar('Printer Type: $type');
-                                  },
-                                  child: const Text('Show Printer Type')),
-                              TextButton(
-                                  onPressed: () async {
-                                    if (printers.isEmpty) return;
-                                    final printer = printers.first;
-                                    final cutter = await _sunmiPrinterXPlugin
-                                        .getCutterNumber(printer.id);
-                                    _showSnackBar('Cutter Number: $cutter');
-                                  },
-                                  child: const Text('Show Cutter Number')),
-                              TextButton(
-                                  onPressed: () async {
-                                    if (printers.isEmpty) return;
-                                    final printer = printers.first;
-                                    final distance = await _sunmiPrinterXPlugin
-                                        .getPrintedDistance(printer.id);
-                                    _showSnackBar(
-                                        'Printed Distance: $distance');
-                                  },
-                                  child: const Text('Show Printed Distance')),
-                              TextButton(
-                                  onPressed: () async {
-                                    if (printers.isEmpty) return;
-                                    final printer = printers.first;
-                                    final hot = await _sunmiPrinterXPlugin
-                                        .getPrinterHotTimes(printer.id);
-                                    _showSnackBar('Printer Hot Times: $hot');
-                                  },
-                                  child: const Text('Show Printer Hot Times')),
-                              TextButton(
-                                  onPressed: () async {
-                                    if (printers.isEmpty) return;
-                                    final printer = printers.first;
-                                    final density = await _sunmiPrinterXPlugin
-                                        .getPrinterDensity(printer.id);
-                                    _showSnackBar('Printer Density: $density');
-                                  },
-                                  child: const Text('Show Printer Density')),
-                              TextButton(
-                                  onPressed: () async {
-                                    // Subscribe to printer status broadcasts
-                                    _broadcastSubscription?.cancel();
-                                    _broadcastSubscription =
-                                        _sunmiPrinterXPlugin
-                                            .subscribeToPrinterStatusBroadcasts(
-                                                (action, data) {
-                                      setState(() {
-                                        _lastBroadcastEvent = 'Action: '
-                                            '$action Data: ${data?.toString() ?? ''}';
-                                      });
-                                      _showSnackBar(_lastBroadcastEvent);
-                                    });
-                                  },
-                                  child: const Text(
-                                      'Subscribe to Printer Status Broadcasts')),
-                              TextButton(
-                                  onPressed: () async {
-                                    // Cancel broadcast subscription
-                                    await _broadcastSubscription?.cancel();
-                                    setState(() {
-                                      _lastBroadcastEvent =
-                                          'Subscription cancelled.';
-                                    });
-                                    _showSnackBar(_lastBroadcastEvent);
-                                  },
-                                  child: const Text(
-                                      'Cancel Broadcast Subscription')),
+                              TextButton.icon(
+                                icon: const Icon(Icons.perm_identity),
+                                label: const Text('Show Printer ID'),
+                                onPressed: () async {
+                                  if (printers.isEmpty) return;
+                                  final printer = printers.first;
+                                  final id = await _sunmiPrinterXPlugin
+                                      .getPrinterId(printer.id);
+                                  _showSnackBar('Printer ID: $id');
+                                },
+                              ),
+                              TextButton.icon(
+                                icon: const Icon(Icons.info_outline),
+                                label: const Text('Show Printer Version'),
+                                onPressed: () async {
+                                  if (printers.isEmpty) return;
+                                  final printer = printers.first;
+                                  final version = await _sunmiPrinterXPlugin
+                                      .getPrinterVersion(printer.id);
+                                  _showSnackBar('Printer Version: $version');
+                                },
+                              ),
+                              TextButton.icon(
+                                icon: const Icon(Icons.print),
+                                label: const Text('Show Printer Type'),
+                                onPressed: () async {
+                                  if (printers.isEmpty) return;
+                                  final printer = printers.first;
+                                  final type = await _sunmiPrinterXPlugin
+                                      .getPrinterType(printer.id);
+                                  _showSnackBar('Printer Type: $type');
+                                },
+                              ),
+                              TextButton.icon(
+                                icon: const Icon(Icons.content_cut),
+                                label: const Text('Show Cutter Number'),
+                                onPressed: () async {
+                                  if (printers.isEmpty) return;
+                                  final printer = printers.first;
+                                  final cutter = await _sunmiPrinterXPlugin
+                                      .getCutterNumber(printer.id);
+                                  _showSnackBar('Cutter Number: $cutter');
+                                },
+                              ),
+                              TextButton.icon(
+                                icon: const Icon(Icons.straighten),
+                                label: const Text('Show Printed Distance'),
+                                onPressed: () async {
+                                  if (printers.isEmpty) return;
+                                  final printer = printers.first;
+                                  final distance = await _sunmiPrinterXPlugin
+                                      .getPrintedDistance(printer.id);
+                                  _showSnackBar('Printed Distance: $distance');
+                                },
+                              ),
+                              TextButton.icon(
+                                icon: const Icon(Icons.whatshot),
+                                label: const Text('Show Printer Hot Times'),
+                                onPressed: () async {
+                                  if (printers.isEmpty) return;
+                                  final printer = printers.first;
+                                  final hot = await _sunmiPrinterXPlugin
+                                      .getPrinterHotTimes(printer.id);
+                                  _showSnackBar('Printer Hot Times: $hot');
+                                },
+                              ),
+                              TextButton.icon(
+                                icon: const Icon(Icons.opacity),
+                                label: const Text('Show Printer Density'),
+                                onPressed: () async {
+                                  if (printers.isEmpty) return;
+                                  final printer = printers.first;
+                                  final density = await _sunmiPrinterXPlugin
+                                      .getPrinterDensity(printer.id);
+                                  _showSnackBar('Printer Density: $density');
+                                },
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                  // Broadcasts Card
+                  Card(
+                    margin: const EdgeInsets.only(bottom: 12),
+                    child: Padding(
+                      padding: const EdgeInsets.all(12),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            children: [
+                              const Text('Broadcasts',
+                                  style: TextStyle(
+                                      fontSize: 18,
+                                      fontWeight: FontWeight.bold)),
+                              const SizedBox(width: 12),
+                              _broadcastSubscription != null
+                                  ? const Chip(
+                                      label: Text('Subscribed'),
+                                      backgroundColor: Colors.green)
+                                  : const Chip(
+                                      label: Text('Not Subscribed'),
+                                      backgroundColor: Colors.red),
+                            ],
+                          ),
+                          const SizedBox(height: 8),
+                          Wrap(
+                            spacing: 8,
+                            runSpacing: 8,
+                            children: [
+                              TextButton.icon(
+                                icon: const Icon(Icons.notifications_active),
+                                label: const Text(
+                                    'Subscribe to Printer Status Broadcasts'),
+                                onPressed: _broadcastSubscription == null
+                                    ? () async {
+                                        _broadcastSubscription?.cancel();
+                                        _broadcastSubscription =
+                                            _sunmiPrinterXPlugin
+                                                .subscribeToPrinterStatusBroadcasts(
+                                                    (action, data) {
+                                          setState(() {
+                                            _lastBroadcastEvent = 'Action: '
+                                                '$action Data: ${data?.toString() ?? ''}';
+                                          });
+                                          _showSnackBar(_lastBroadcastEvent);
+                                        });
+                                        setState(() {});
+                                      }
+                                    : null,
+                              ),
+                              TextButton.icon(
+                                icon: const Icon(Icons.notifications_off),
+                                label:
+                                    const Text('Cancel Broadcast Subscription'),
+                                onPressed: _broadcastSubscription != null
+                                    ? () async {
+                                        await _broadcastSubscription?.cancel();
+                                        setState(() {
+                                          _lastBroadcastEvent =
+                                              'Subscription cancelled.';
+                                          _broadcastSubscription = null;
+                                        });
+                                        _showSnackBar(_lastBroadcastEvent);
+                                      }
+                                    : null,
+                              ),
                             ],
                           ),
                         ],
