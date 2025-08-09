@@ -105,6 +105,10 @@ class SunmiPrinterX {
   static List<String> get _printerStatusActions =>
       printerStatusActions.map((e) => printerStatusActionToString[e]!).toList();
 
+  PrinterStatusAction getPrinterStatusAction(String action) {
+    return printerStatusActionFromString[action] ?? PrinterStatusAction.error;
+  }
+
   /// Starts listening to printer status broadcasts.
   ///
   /// [onEvent] is called with the broadcast action and its data whenever a printer status event occurs.
@@ -119,11 +123,16 @@ class SunmiPrinterX {
   /// await sub.cancel();
   /// ```
   PrinterStatusBroadcastSubscription subscribeToPrinterStatusBroadcasts(
-    void Function(String action, Map<String, dynamic>? data) onEvent,
+    void Function(PrinterStatusAction action) onEvent,
   ) {
     final receiver = BroadcastReceiver(names: _printerStatusActions);
+    PrinterStatusAction? lastAction;
     final subscription = receiver.messages.listen((event) {
-      onEvent(event.name, event.data);
+      final newAction = getPrinterStatusAction(event.name);
+      if (lastAction != newAction) {
+        lastAction = newAction;
+        onEvent(newAction);
+      }
     });
     receiver.start();
     return PrinterStatusBroadcastSubscription(subscription, receiver);

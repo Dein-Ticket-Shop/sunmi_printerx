@@ -25,7 +25,7 @@ class _MyAppState extends State<MyApp> {
   final _sunmiPrinterXPlugin = SunmiPrinterX();
   final _messangerKey = GlobalKey<ScaffoldMessengerState>();
   PrinterStatusBroadcastSubscription? _broadcastSubscription;
-  String _lastBroadcastEvent = '';
+  PrinterStatusAction _lastBroadcastEvent = PrinterStatusAction.normal;
 
   void _showSnackBar(String message) {
     _messangerKey.currentState?.removeCurrentSnackBar();
@@ -470,12 +470,12 @@ class _MyAppState extends State<MyApp> {
                                         _broadcastSubscription =
                                             _sunmiPrinterXPlugin
                                                 .subscribeToPrinterStatusBroadcasts(
-                                                    (action, data) {
+                                                    (action) {
                                           setState(() {
-                                            _lastBroadcastEvent = 'Action: '
-                                                '$action Data: ${data?.toString() ?? ''}';
+                                            _lastBroadcastEvent = action;
                                           });
-                                          _showSnackBar(_lastBroadcastEvent);
+                                          _showSnackBar(
+                                              _lastBroadcastEvent.toString());
                                         });
                                         setState(() {});
                                       }
@@ -490,10 +490,9 @@ class _MyAppState extends State<MyApp> {
                                         await _broadcastSubscription?.cancel();
                                         setState(() {
                                           _lastBroadcastEvent =
-                                              'Subscription cancelled.';
+                                              PrinterStatusAction.normal;
                                           _broadcastSubscription = null;
                                         });
-                                        _showSnackBar(_lastBroadcastEvent);
                                       }
                                     : null,
                               ),
