@@ -1,4 +1,5 @@
 import 'dart:typed_data';
+import 'sunmi_printerx.dart';
 
 import 'package:sunmi_printerx/printerstatus.dart';
 
@@ -45,6 +46,13 @@ class Printer {
       bool strikethrough,
       bool italic,
       Align align}) addText;
+  final Future<String> Function() getPrinterId;
+  final Future<String> Function() getPrinterVersion;
+  final Future<SunmiPrinterType> Function() getPrinterType;
+  final Future<int> Function() getCutterNumber;
+  final Future<int> Function() getPrintedDistance;
+  final Future<int> Function() getPrinterHotTimes;
+  final Future<int> Function() getPrinterDensity;
 
   Printer({
     required this.name,
@@ -69,5 +77,12 @@ class Printer {
     required this.printQrCode,
     required this.printTexts,
     required this.addText,
+    required this.getPrinterId,
+    required this.getPrinterVersion,
+    required this.getPrinterType,
+    required this.getCutterNumber,
+    required this.getPrintedDistance,
+    required this.getPrinterHotTimes,
+    required this.getPrinterDensity,
   });
 }

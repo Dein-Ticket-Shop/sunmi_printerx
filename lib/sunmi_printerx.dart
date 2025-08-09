@@ -203,6 +203,13 @@ class SunmiPrinterX {
                 strikethrough: strikethrough,
                 italic: italic,
                 align: align),
+        getPrinterId: () => getPrinterId(id),
+        getPrinterVersion: () => getPrinterVersion(id),
+        getPrinterType: () => getPrinterType(id),
+        getCutterNumber: () => getCutterNumber(id),
+        getPrintedDistance: () => getPrintedDistance(id),
+        getPrinterHotTimes: () => getPrinterHotTimes(id),
+        getPrinterDensity: () => getPrinterDensity(id),
       );
       return printer;
     }).toList();

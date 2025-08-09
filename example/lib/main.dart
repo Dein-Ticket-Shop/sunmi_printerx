@@ -60,7 +60,7 @@ class _MyAppState extends State<MyApp> {
       scaffoldMessengerKey: _messangerKey,
       home: Scaffold(
         appBar: AppBar(
-          title: const Text('Plugin example app'),
+          title: const Text('Sunmi PrinterX Example App'),
         ),
         body: LayoutBuilder(
           builder: (context, constraints) {
@@ -354,8 +354,7 @@ class _MyAppState extends State<MyApp> {
                                 onPressed: () async {
                                   if (printers.isEmpty) return;
                                   final printer = printers.first;
-                                  final id = await _sunmiPrinterXPlugin
-                                      .getPrinterId(printer.id);
+                                  final id = await printer.getPrinterId();
                                   _showSnackBar('Printer ID: $id');
                                 },
                               ),
@@ -365,8 +364,8 @@ class _MyAppState extends State<MyApp> {
                                 onPressed: () async {
                                   if (printers.isEmpty) return;
                                   final printer = printers.first;
-                                  final version = await _sunmiPrinterXPlugin
-                                      .getPrinterVersion(printer.id);
+                                  final version =
+                                      await printer.getPrinterVersion();
                                   _showSnackBar('Printer Version: $version');
                                 },
                               ),
@@ -376,8 +375,7 @@ class _MyAppState extends State<MyApp> {
                                 onPressed: () async {
                                   if (printers.isEmpty) return;
                                   final printer = printers.first;
-                                  final type = await _sunmiPrinterXPlugin
-                                      .getPrinterType(printer.id);
+                                  final type = await printer.getPrinterType();
                                   _showSnackBar('Printer Type: $type');
                                 },
                               ),
@@ -387,8 +385,8 @@ class _MyAppState extends State<MyApp> {
                                 onPressed: () async {
                                   if (printers.isEmpty) return;
                                   final printer = printers.first;
-                                  final cutter = await _sunmiPrinterXPlugin
-                                      .getCutterNumber(printer.id);
+                                  final cutter =
+                                      await printer.getCutterNumber();
                                   _showSnackBar('Cutter Number: $cutter');
                                 },
                               ),
@@ -398,8 +396,8 @@ class _MyAppState extends State<MyApp> {
                                 onPressed: () async {
                                   if (printers.isEmpty) return;
                                   final printer = printers.first;
-                                  final distance = await _sunmiPrinterXPlugin
-                                      .getPrintedDistance(printer.id);
+                                  final distance =
+                                      await printer.getPrintedDistance();
                                   _showSnackBar('Printed Distance: $distance');
                                 },
                               ),
@@ -409,8 +407,8 @@ class _MyAppState extends State<MyApp> {
                                 onPressed: () async {
                                   if (printers.isEmpty) return;
                                   final printer = printers.first;
-                                  final hot = await _sunmiPrinterXPlugin
-                                      .getPrinterHotTimes(printer.id);
+                                  final hot =
+                                      await printer.getPrinterHotTimes();
                                   _showSnackBar('Printer Hot Times: $hot');
                                 },
                               ),
@@ -420,8 +418,8 @@ class _MyAppState extends State<MyApp> {
                                 onPressed: () async {
                                   if (printers.isEmpty) return;
                                   final printer = printers.first;
-                                  final density = await _sunmiPrinterXPlugin
-                                      .getPrinterDensity(printer.id);
+                                  final density =
+                                      await printer.getPrinterDensity();
                                   _showSnackBar('Printer Density: $density');
                                 },
                               ),
