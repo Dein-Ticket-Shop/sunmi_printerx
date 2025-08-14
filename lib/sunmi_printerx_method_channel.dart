@@ -92,17 +92,21 @@ class MethodChannelSunmiPrinterX extends SunmiPrinterXPlatform {
   Future<void> printText(String printerId, String text,
       {required int textWidthRatio,
       required int textHeightRatio,
+      required int textSize,
       required int textSpace,
       required bool bold,
       required bool underline,
       required bool strikethrough,
       required bool italic,
       required Align align}) async {
+    // Defensive clamp on textSize to supported range [6, 96]
+    final int clampedTextSize = textSize.clamp(6, 96);
     await methodChannel.invokeMethod<void>('printText', <String, dynamic>{
       'printerId': printerId,
       'text': text,
       'textWidthRatio': textWidthRatio,
       'textHeightRatio': textHeightRatio,
+      'textSize': clampedTextSize,
       'textSpace': textSpace,
       'bold': bold,
       'underline': underline,
@@ -139,17 +143,21 @@ class MethodChannelSunmiPrinterX extends SunmiPrinterXPlatform {
   Future<void> addText(String printerId, String text,
       {required int textWidthRatio,
       required int textHeightRatio,
+      required int textSize,
       required int textSpace,
       required bool bold,
       required bool underline,
       required bool strikethrough,
       required bool italic,
       required Align align}) async {
+    // Defensive clamp on textSize to supported range [6, 96]
+    final int clampedTextSize = textSize.clamp(6, 96);
     await methodChannel.invokeMethod<void>('addText', <String, dynamic>{
       'printerId': printerId,
       'text': text,
       'textWidthRatio': textWidthRatio,
       'textHeightRatio': textHeightRatio,
+      'textSize': clampedTextSize,
       'textSpace': textSpace,
       'bold': bold,
       'underline': underline,

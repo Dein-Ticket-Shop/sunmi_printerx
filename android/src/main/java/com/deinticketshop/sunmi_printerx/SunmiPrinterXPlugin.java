@@ -410,6 +410,7 @@ public class SunmiPrinterXPlugin implements FlutterPlugin, MethodCallHandler {
         return TextStyle.getStyle()
                 .setTextWidthRatio(Integer.parseInt(call.argument("textWidthRatio").toString()))
                 .setTextHeightRatio(Integer.parseInt(call.argument("textHeightRatio").toString()))
+                .setTextSize(Integer.parseInt(call.argument("textSize").toString()))
                 .setTextSpace(Integer.parseInt(call.argument("textSpace").toString()))
                 .enableBold(Boolean.parseBoolean(call.argument("bold").toString()))
                 .enableUnderline(Boolean.parseBoolean(call.argument("underline").toString()))
