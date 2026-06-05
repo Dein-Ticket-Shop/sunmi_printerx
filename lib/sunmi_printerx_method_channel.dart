@@ -4,9 +4,7 @@ import 'package:sunmi_printerx/align.dart';
 
 import 'sunmi_printerx_platform_interface.dart';
 
-/// An implementation of [SunmiPrinterXPlatform] that uses method channels.
 class MethodChannelSunmiPrinterX extends SunmiPrinterXPlatform {
-  /// The method channel used to interact with the native platform.
   @visibleForTesting
   final methodChannel = const MethodChannel('sunmi_printerx');
 
@@ -15,9 +13,7 @@ class MethodChannelSunmiPrinterX extends SunmiPrinterXPlatform {
     final result = await methodChannel.invokeListMethod('getPrinters');
     if (result == null) {
       throw PlatformException(
-        code: 'UNKNOWN',
-        message: 'Unable to find printer.',
-      );
+          code: 'UNKNOWN', message: 'Unable to find printer.');
     }
     return List<Map<String, dynamic>>.from(
         result.map((e) => Map<String, dynamic>.from(e)));
@@ -29,9 +25,7 @@ class MethodChannelSunmiPrinterX extends SunmiPrinterXPlatform {
         'openCashDrawer', <String, dynamic>{'printerId': printerId});
     if (result == null) {
       throw PlatformException(
-        code: 'UNKNOWN',
-        message: 'Unable to open cash drawer.',
-      );
+          code: 'UNKNOWN', message: 'Unable to open cash drawer.');
     }
     return result;
   }
@@ -39,14 +33,10 @@ class MethodChannelSunmiPrinterX extends SunmiPrinterXPlatform {
   @override
   Future<String> getPrinterStatus(String printerId) async {
     final result = await methodChannel.invokeMethod<String>(
-      'getPrinterStatus',
-      <String, dynamic>{'printerId': printerId},
-    );
+        'getPrinterStatus', <String, dynamic>{'printerId': printerId});
     if (result == null) {
       throw PlatformException(
-        code: 'UNKNOWN',
-        message: 'Unable to get printer status.',
-      );
+          code: 'UNKNOWN', message: 'Unable to get printer status.');
     }
     return result;
   }
@@ -57,9 +47,8 @@ class MethodChannelSunmiPrinterX extends SunmiPrinterXPlatform {
         'isCashDrawerOpen', <String, dynamic>{'printerId': printerId});
     if (result == null) {
       throw PlatformException(
-        code: 'UNKNOWN',
-        message: 'Unable to determine if cash drawer is open.',
-      );
+          code: 'UNKNOWN',
+          message: 'Unable to determine if cash drawer is open.');
     }
     return result;
   }
@@ -99,7 +88,6 @@ class MethodChannelSunmiPrinterX extends SunmiPrinterXPlatform {
       required bool strikethrough,
       required bool italic,
       required Align align}) async {
-    // Defensive clamp on textSize to supported range [6, 96]
     final int clampedTextSize = textSize.clamp(6, 96);
     await methodChannel.invokeMethod<void>('printText', <String, dynamic>{
       'printerId': printerId,
@@ -150,7 +138,6 @@ class MethodChannelSunmiPrinterX extends SunmiPrinterXPlatform {
       required bool strikethrough,
       required bool italic,
       required Align align}) async {
-    // Defensive clamp on textSize to supported range [6, 96]
     final int clampedTextSize = textSize.clamp(6, 96);
     await methodChannel.invokeMethod<void>('addText', <String, dynamic>{
       'printerId': printerId,
@@ -168,31 +155,6 @@ class MethodChannelSunmiPrinterX extends SunmiPrinterXPlatform {
   }
 
   @override
-  Future<void> controlLamp(int status, String lamp) {
-    return methodChannel.invokeMethod<void>('controlLamp', <String, dynamic>{
-      'status': status,
-      'lamp': lamp,
-    });
-  }
-
-  @override
-  Future<void> controlLampForLoops(
-      int status, int onTime, int offTime, List<String> lamps) {
-    return methodChannel
-        .invokeMethod<void>('controlLampForLoops', <String, dynamic>{
-      'status': status,
-      'onTime': onTime,
-      'offTime': offTime,
-      'lamps': lamps,
-    });
-  }
-
-  @override
-  Future<void> lampsOff() {
-    return methodChannel.invokeMethod<void>('lampsOff');
-  }
-
-  @override
   Future<String> getInfo(String printerId, String infoType) async {
     final result =
         await methodChannel.invokeMethod<String>('getInfo', <String, dynamic>{
@@ -201,10 +163,42 @@ class MethodChannelSunmiPrinterX extends SunmiPrinterXPlatform {
     });
     if (result == null) {
       throw PlatformException(
-        code: 'UNKNOWN',
-        message: 'Unable to get info $infoType.',
-      );
+          code: 'UNKNOWN', message: 'Unable to get info $infoType.');
     }
     return result;
+  }
+
+  // ── Unified status light ───────────────────────────────────────────────────
+
+  @override
+  Future<void> setStatusLightColor(String color) {
+    return methodChannel.invokeMethod<void>(
+        'setStatusLightColor', <String, dynamic>{'color': color});
+  }
+
+  @override
+  Future<void> setStatusLightOff() {
+    return methodChannel.invokeMethod<void>('setStatusLightOff');
+  }
+
+  @override
+  Future<void> setStatusLightFlashing(String color, int onMs, int offMs) {
+    return methodChannel
+        .invokeMethod<void>('setStatusLightFlashing', <String, dynamic>{
+      'color': color,
+      'onMs': onMs,
+      'offMs': offMs,
+    });
+  }
+
+  @override
+  Future<void> setStatusLightMultiFlashing(
+      List<String> colors, List<int> onMs, List<int> offMs) {
+    return methodChannel
+        .invokeMethod<void>('setStatusLightMultiFlashing', <String, dynamic>{
+      'colors': colors,
+      'onMs': onMs,
+      'offMs': offMs,
+    });
   }
 }

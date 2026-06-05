@@ -287,7 +287,7 @@ class _MyAppState extends State<MyApp> {
                                 TextButton(
                                   onPressed: () {
                                     _sunmiPrinterXPlugin
-                                        .setAlarmLampColorStatic(color);
+                                        .setStatusLightColor(color);
                                   },
                                   style: TextButton.styleFrom(
                                     backgroundColor: {
@@ -300,20 +300,20 @@ class _MyAppState extends State<MyApp> {
                                       AlarmLampColor.cyan: Colors.cyan,
                                     }[color],
                                   ),
-                                  child: Text('Alarm Lamp ${color.name}'),
+                                  child: Text('Status Light ${color.name}'),
                                 ),
                               TextButton(
                                   onPressed: () {
-                                    _sunmiPrinterXPlugin.setAlarmLampsOff();
+                                    _sunmiPrinterXPlugin.setStatusLightOff();
                                   },
-                                  child: const Text('Alarm Lamps Off')),
+                                  child: const Text('Status Light Off')),
                               TextButton(
                                   onPressed: () {
                                     _sunmiPrinterXPlugin
-                                        .setAlarmLampColorBlinking(
+                                        .setStatusLightFlashing(
                                             AlarmLampColor.yellow, 200, 200);
                                   },
-                                  child: const Text('Alarm Lamps Blinking')),
+                                  child: const Text('Status Light Blinking')),
                             ],
                           ),
                         ],

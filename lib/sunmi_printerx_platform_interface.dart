@@ -6,21 +6,14 @@ import 'package:sunmi_printerx/align.dart';
 import 'sunmi_printerx_method_channel.dart';
 
 abstract class SunmiPrinterXPlatform extends PlatformInterface {
-  /// Constructs a SunmiPrinterXPlatform.
   SunmiPrinterXPlatform() : super(token: _token);
 
   static final Object _token = Object();
 
   static SunmiPrinterXPlatform _instance = MethodChannelSunmiPrinterX();
 
-  /// The default instance of [SunmiPrinterXPlatform] to use.
-  ///
-  /// Defaults to [MethodChannelSunmiPrinterX].
   static SunmiPrinterXPlatform get instance => _instance;
 
-  /// Platform-specific implementations should set this with their own
-  /// platform-specific class that extends [SunmiPrinterXPlatform] when
-  /// they register themselves.
   static set instance(SunmiPrinterXPlatform instance) {
     PlatformInterface.verifyToken(instance, _token);
     _instance = instance;
@@ -90,20 +83,28 @@ abstract class SunmiPrinterXPlatform extends PlatformInterface {
     throw UnimplementedError('addText() has not been implemented.');
   }
 
-  Future<void> controlLamp(int status, String lamp) {
-    throw UnimplementedError('controlLamp() has not been implemented.');
-  }
-
-  Future<void> controlLampForLoops(
-      int status, int onTime, int offTime, List<String> lamps) {
-    throw UnimplementedError('controlLampForLoops() has not been implemented.');
-  }
-
-  Future<void> lampsOff() {
-    throw UnimplementedError('lampsOff() has not been implemented.');
-  }
-
   Future<String> getInfo(String printerId, String infoType) {
     throw UnimplementedError('getInfo() has not been implemented.');
+  }
+
+  // ── Unified status light (K2 Kiosk + Flex 3) ──────────────────────────────
+
+  Future<void> setStatusLightColor(String color) {
+    throw UnimplementedError('setStatusLightColor() has not been implemented.');
+  }
+
+  Future<void> setStatusLightOff() {
+    throw UnimplementedError('setStatusLightOff() has not been implemented.');
+  }
+
+  Future<void> setStatusLightFlashing(String color, int onMs, int offMs) {
+    throw UnimplementedError(
+        'setStatusLightFlashing() has not been implemented.');
+  }
+
+  Future<void> setStatusLightMultiFlashing(
+      List<String> colors, List<int> onMs, List<int> offMs) {
+    throw UnimplementedError(
+        'setStatusLightMultiFlashing() has not been implemented.');
   }
 }

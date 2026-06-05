@@ -321,32 +321,24 @@ class SunmiPrinterX {
         align: align);
   }
 
-  Future<void> _setAlarmLampStatic(String lamp, bool on) async {
-    await SunmiPrinterXPlatform.instance.controlLamp(on ? 0 : 1, lamp);
+  Future<void> setStatusLightColor(AlarmLampColor color) {
+    return SunmiPrinterXPlatform.instance.setStatusLightColor(color.name);
   }
 
-  Future<void> setAlarmLampColorStatic(AlarmLampColor color) async {
-    await setAlarmLampsOff();
-    for (String lamp in alarmLampColorToLEDs(color)) {
-      await _setAlarmLampStatic(lamp, true);
-    }
+  Future<void> setStatusLightOff() {
+    return SunmiPrinterXPlatform.instance.setStatusLightOff();
   }
 
-  Future<void> _setAlarmLampsBlinking(
-      int status, int onTime, int offTime, List<String> lamps) {
+  Future<void> setStatusLightFlashing(
+      AlarmLampColor color, int onMs, int offMs) {
     return SunmiPrinterXPlatform.instance
-        .controlLampForLoops(status, onTime, offTime, lamps);
+        .setStatusLightFlashing(color.name, onMs, offMs);
   }
 
-  Future<void> setAlarmLampColorBlinking(
-      AlarmLampColor color, int onTime, int offTime) async {
-    await setAlarmLampsOff();
-    await _setAlarmLampsBlinking(
-        0, onTime, offTime, alarmLampColorToLEDs(color));
-  }
-
-  Future<void> setAlarmLampsOff() async {
-    await SunmiPrinterXPlatform.instance.lampsOff();
+  Future<void> setStatusLightMultiFlashing(
+      List<AlarmLampColor> colors, List<int> onMs, List<int> offMs) {
+    return SunmiPrinterXPlatform.instance.setStatusLightMultiFlashing(
+        colors.map((c) => c.name).toList(), onMs, offMs);
   }
 
   Future<String> getPrinterId(String printerId) =>
