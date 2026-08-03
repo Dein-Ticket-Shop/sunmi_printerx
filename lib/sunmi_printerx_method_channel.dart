@@ -53,6 +53,79 @@ class MethodChannelSunmiPrinterX extends SunmiPrinterXPlatform {
     return result;
   }
 
+  // ── Cash Drawer Trigger (standalone USB/BLE dongle) ────────────────────────
+
+  @override
+  Future<String> getCashDrawerTriggerUsb() async {
+    final result =
+        await methodChannel.invokeMethod<String>('getCashDrawerTriggerUsb');
+    if (result == null) {
+      throw PlatformException(
+          code: 'UNKNOWN', message: 'Unable to get USB cash drawer trigger.');
+    }
+    return result;
+  }
+
+  @override
+  Future<List<String>> scanCashDrawerTriggerBle() async {
+    final result = await methodChannel
+        .invokeListMethod<String>('scanCashDrawerTriggerBle');
+    return result ?? <String>[];
+  }
+
+  @override
+  Future<String> connectCashDrawerTriggerBle(String name) async {
+    final result = await methodChannel.invokeMethod<String>(
+        'connectCashDrawerTriggerBle', <String, dynamic>{'name': name});
+    if (result == null) {
+      throw PlatformException(
+          code: 'UNKNOWN',
+          message: 'Unable to connect to cash drawer trigger $name.');
+    }
+    return result;
+  }
+
+  @override
+  Future<bool> openCashDrawerTrigger(String triggerId,
+      {required int openTimeMs, required int closeTimeMs}) async {
+    final result = await methodChannel
+        .invokeMethod<bool>('openCashDrawerTrigger', <String, dynamic>{
+      'triggerId': triggerId,
+      'openTimeMs': openTimeMs,
+      'closeTimeMs': closeTimeMs,
+    });
+    if (result == null) {
+      throw PlatformException(
+          code: 'UNKNOWN', message: 'Unable to open cash drawer trigger.');
+    }
+    return result;
+  }
+
+  @override
+  Future<bool> isCashDrawerTriggerOpen(String triggerId) async {
+    final result = await methodChannel.invokeMethod<bool>(
+        'isCashDrawerTriggerOpen', <String, dynamic>{'triggerId': triggerId});
+    if (result == null) {
+      throw PlatformException(
+          code: 'UNKNOWN',
+          message: 'Unable to determine if cash drawer trigger is open.');
+    }
+    return result;
+  }
+
+  @override
+  Future<String> getCashDrawerTriggerSerialNo(String triggerId) async {
+    final result = await methodChannel.invokeMethod<String>(
+        'getCashDrawerTriggerSerialNo',
+        <String, dynamic>{'triggerId': triggerId});
+    if (result == null) {
+      throw PlatformException(
+          code: 'UNKNOWN',
+          message: 'Unable to get cash drawer trigger serial number.');
+    }
+    return result;
+  }
+
   @override
   Future<void> printEscPosCommands(String printerId, Uint8List commands) async {
     await methodChannel

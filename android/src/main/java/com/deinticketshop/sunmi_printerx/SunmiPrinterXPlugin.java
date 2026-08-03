@@ -4,7 +4,9 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.os.Handler;
 import android.os.IBinder;
+import android.os.Looper;
 import android.os.RemoteException;
 import android.util.Log;
 
@@ -28,6 +30,13 @@ import com.sunmi.printerx.style.TextStyle;
 import com.sunmi.statuslampmanager.IStateLamp;
 import com.sunmi.peripheralsdk.Color;
 import com.sunmi.peripheralsdk.StatusLightManager;
+
+import com.sunmi.cashbox.SunmiCashBoxManager;
+import com.sunmi.cashbox.SunmiCashBoxException;
+import com.sunmi.cashbox.adapter.CashBoxAdapter;
+import com.sunmi.cashbox.callback.AdapterCallback;
+import com.sunmi.cashbox.callback.ResultCallback;
+import com.sunmi.cashbox.callback.StatusCallback;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -174,6 +183,52 @@ public class SunmiPrinterXPlugin implements FlutterPlugin, MethodCallHandler {
 
     private PrinterSdk.Printer getPrinter(MethodCall call) {
         return printers.get(call.argument("printerId").toString());
+    }
+
+    // ── Cash Drawer Trigger (com.sunmi.cashbox SDK) ───────────────────────────
+    // Standalone USB/BLE dongle that opens a cash drawer directly (RJ12),
+    // independent of any printer's own cash drawer port.
+
+    private final HashMap<String, CashBoxAdapter> cashBoxAdapters = new HashMap<>();
+
+    private CashBoxAdapter getCashBoxAdapter(MethodCall call) {
+        return cashBoxAdapters.get(call.argument("triggerId").toString());
+    }
+
+    // CashBoxAdapter serializes all its operations on its own single-thread
+    // executor, so calling cashBoxStatus() right after openCashBox() queues
+    // behind it and naturally only runs once the open command has finished -
+    // no artificial delay needed for the first check. Retries add a short
+    // delay in case the drawer takes a moment to physically latch open.
+    private void confirmCashDrawerOpened(CashBoxAdapter adapter, Result result, boolean[] resolved, int attempt) {
+        if (resolved[0]) return;
+        adapter.cashBoxStatus(new StatusCallback() {
+            @Override
+            public void onStatus(byte[] status) {
+                if (resolved[0]) return;
+                boolean open = status != null && status.length > 0 && (status[0] & 0xFF) == 0x12;
+                if (open || attempt >= 2) {
+                    resolved[0] = true;
+                    result.success(true);
+                } else {
+                    new Handler(Looper.getMainLooper()).postDelayed(
+                            () -> confirmCashDrawerOpened(adapter, result, resolved, attempt + 1), 300);
+                }
+            }
+
+            @Override
+            public void onError(String s) {
+                if (resolved[0]) return;
+                if (attempt >= 2) {
+                    // Can't confirm either way, but the open command was already sent.
+                    resolved[0] = true;
+                    result.success(true);
+                } else {
+                    new Handler(Looper.getMainLooper()).postDelayed(
+                            () -> confirmCashDrawerOpened(adapter, result, resolved, attempt + 1), 300);
+                }
+            }
+        });
     }
 
     private static TextStyle getTextStyle(MethodCall call) {
@@ -367,6 +422,165 @@ public class SunmiPrinterXPlugin implements FlutterPlugin, MethodCallHandler {
                     }
                 }).start();
                 break;
+
+            // ── Cash Drawer Trigger (com.sunmi.cashbox SDK) ──────────────────
+
+            case "getCashDrawerTriggerUsb": {
+                try {
+                    CashBoxAdapter adapter = SunmiCashBoxManager.getInstance().getUsbAdapter(context);
+                    cashBoxAdapters.put(adapter.getAdapterName(), adapter);
+                    result.success(adapter.getAdapterName());
+                } catch (Exception e) {
+                    result.error("ERROR", e.getMessage(), null);
+                }
+                break;
+            }
+
+            case "scanCashDrawerTriggerBle": {
+                try {
+                    // Sunmi's own demo app never relies on onFinish() to end a BLE
+                    // scan - it just lets it run for as long as the search screen
+                    // is visible, since onFinish() isn't reliably called. We cap
+                    // the scan to a fixed window instead.
+                    List<String> found = new ArrayList<>();
+                    boolean[] resolved = {false};
+                    Handler handler = new Handler(Looper.getMainLooper());
+                    Runnable finish = () -> {
+                        if (!resolved[0]) {
+                            resolved[0] = true;
+                            result.success(new ArrayList<>(found));
+                        }
+                    };
+                    handler.postDelayed(finish, 6000);
+                    SunmiCashBoxManager.getInstance().getBleAdapter(context, new AdapterCallback() {
+                        @Override
+                        public void onGetAdapter(CashBoxAdapter adapter) {
+                            String id = adapter.getAdapterName();
+                            if (!found.contains(id)) {
+                                found.add(id);
+                            }
+                        }
+
+                        @Override
+                        public void onFinish() {
+                            handler.removeCallbacks(finish);
+                            finish.run();
+                        }
+                    });
+                } catch (SunmiCashBoxException e) {
+                    result.error("ERROR", e.getMessage(), null);
+                }
+                break;
+            }
+
+            case "connectCashDrawerTriggerBle": {
+                String bleName = call.argument("name");
+                try {
+                    // Same as above: onFinish() isn't reliably called when the
+                    // named device can't be reached, so bound the wait ourselves.
+                    boolean[] resolved = {false};
+                    Handler handler = new Handler(Looper.getMainLooper());
+                    Runnable giveUp = () -> {
+                        if (!resolved[0]) {
+                            resolved[0] = true;
+                            result.error("NOT_FOUND", "Cash drawer trigger not found: " + bleName, null);
+                        }
+                    };
+                    handler.postDelayed(giveUp, 6000);
+                    SunmiCashBoxManager.getInstance().getBleAdapter(context, bleName, new AdapterCallback() {
+                        @Override
+                        public void onGetAdapter(CashBoxAdapter adapter) {
+                            if (resolved[0]) return;
+                            resolved[0] = true;
+                            handler.removeCallbacks(giveUp);
+                            cashBoxAdapters.put(adapter.getAdapterName(), adapter);
+                            result.success(adapter.getAdapterName());
+                        }
+
+                        @Override
+                        public void onFinish() {
+                            handler.removeCallbacks(giveUp);
+                            giveUp.run();
+                        }
+                    });
+                } catch (SunmiCashBoxException e) {
+                    result.error("ERROR", e.getMessage(), null);
+                }
+                break;
+            }
+
+            case "openCashDrawerTrigger": {
+                CashBoxAdapter adapter = getCashBoxAdapter(call);
+                if (adapter == null) {
+                    result.error("NOT_FOUND", "Unknown cash drawer trigger", null);
+                    break;
+                }
+                long openMs = Long.parseLong(call.argument("openTimeMs").toString());
+                long closeMs = Long.parseLong(call.argument("closeTimeMs").toString());
+                // The SDK's ResultCallback for openCashBox is never actually
+                // invoked in practice even though the drawer physically opens,
+                // so confirm success via cashBoxStatus() instead of trusting it.
+                boolean[] resolved = {false};
+                adapter.openCashBox(openMs, closeMs, new ResultCallback() {
+                    @Override
+                    public void onResult(String s) {
+                        if (resolved[0]) return;
+                        resolved[0] = true;
+                        result.success(true);
+                    }
+
+                    @Override
+                    public void onError(String s) {
+                        if (resolved[0]) return;
+                        resolved[0] = true;
+                        result.error("ERROR", s, null);
+                    }
+                });
+                confirmCashDrawerOpened(adapter, result, resolved, 0);
+                break;
+            }
+
+            case "isCashDrawerTriggerOpen": {
+                CashBoxAdapter adapter = getCashBoxAdapter(call);
+                if (adapter == null) {
+                    result.error("NOT_FOUND", "Unknown cash drawer trigger", null);
+                    break;
+                }
+                adapter.cashBoxStatus(new StatusCallback() {
+                    @Override
+                    public void onStatus(byte[] status) {
+                        // RJ12 Pin3: 0x12 = low = open, 0x16 = high = closed.
+                        boolean open = status != null && status.length > 0 && (status[0] & 0xFF) == 0x12;
+                        result.success(open);
+                    }
+
+                    @Override
+                    public void onError(String s) {
+                        result.error("ERROR", s, null);
+                    }
+                });
+                break;
+            }
+
+            case "getCashDrawerTriggerSerialNo": {
+                CashBoxAdapter adapter = getCashBoxAdapter(call);
+                if (adapter == null) {
+                    result.error("NOT_FOUND", "Unknown cash drawer trigger", null);
+                    break;
+                }
+                adapter.getSerialNo(new ResultCallback() {
+                    @Override
+                    public void onResult(String s) {
+                        result.success(s);
+                    }
+
+                    @Override
+                    public void onError(String s) {
+                        result.error("ERROR", s, null);
+                    }
+                });
+                break;
+            }
 
             // ── Unified status light (K2 + Flex 3) ───────────────────────────
 

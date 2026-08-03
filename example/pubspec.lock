@@ -106,8 +106,8 @@ packages:
     dependency: transitive
     description:
       path: "."
-      ref: HEAD
-      resolved-ref: "6365e14d49f7db63a2bbffc0d8c6503246f78244"
+      ref: ec56c1687236e67febaadb5f6134b713e2020c51
+      resolved-ref: ec56c1687236e67febaadb5f6134b713e2020c51
       url: "https://github.com/Dein-Ticket-Shop/flutter_broadcasts"
     source: git
     version: "0.4.0"
@@ -326,7 +326,7 @@ packages:
       path: ".."
       relative: true
     source: path
-    version: "1.3.0"
+    version: "1.4.0"
   sync_http:
     dependency: transitive
     description:

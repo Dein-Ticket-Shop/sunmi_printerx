@@ -35,6 +35,39 @@ abstract class SunmiPrinterXPlatform extends PlatformInterface {
     throw UnimplementedError('isCashDrawerOpen() has not been implemented.');
   }
 
+  // ── Cash Drawer Trigger (standalone USB/BLE dongle) ────────────────────────
+
+  Future<String> getCashDrawerTriggerUsb() {
+    throw UnimplementedError(
+        'getCashDrawerTriggerUsb() has not been implemented.');
+  }
+
+  Future<List<String>> scanCashDrawerTriggerBle() {
+    throw UnimplementedError(
+        'scanCashDrawerTriggerBle() has not been implemented.');
+  }
+
+  Future<String> connectCashDrawerTriggerBle(String name) {
+    throw UnimplementedError(
+        'connectCashDrawerTriggerBle() has not been implemented.');
+  }
+
+  Future<bool> openCashDrawerTrigger(String triggerId,
+      {required int openTimeMs, required int closeTimeMs}) {
+    throw UnimplementedError(
+        'openCashDrawerTrigger() has not been implemented.');
+  }
+
+  Future<bool> isCashDrawerTriggerOpen(String triggerId) {
+    throw UnimplementedError(
+        'isCashDrawerTriggerOpen() has not been implemented.');
+  }
+
+  Future<String> getCashDrawerTriggerSerialNo(String triggerId) {
+    throw UnimplementedError(
+        'getCashDrawerTriggerSerialNo() has not been implemented.');
+  }
+
   Future<void> printEscPosCommands(String printerId, Uint8List commands) {
     throw UnimplementedError('printEscPosCommands() has not been implemented.');
   }

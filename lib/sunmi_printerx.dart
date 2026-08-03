@@ -2,6 +2,7 @@ import 'dart:typed_data';
 import 'dart:async';
 import 'package:sunmi_printerx/alarm_lamp_color.dart';
 import 'package:sunmi_printerx/align.dart';
+import 'package:sunmi_printerx/cash_drawer_trigger.dart';
 import 'package:sunmi_printerx/printer.dart';
 import 'package:sunmi_printerx/printerstatus.dart';
 import 'package:flutter_broadcasts/flutter_broadcasts.dart';
@@ -373,5 +374,52 @@ class SunmiPrinterX {
     final value =
         await SunmiPrinterXPlatform.instance.getInfo(printerId, 'DENSITY');
     return int.tryParse(value) ?? 0;
+  }
+
+  // ── Cash Drawer Trigger (standalone USB/BLE dongle) ────────────────────────
+  //
+  // A "Cash Drawer Trigger" is a small USB/Bluetooth dongle that opens a cash
+  // drawer (RJ12) directly, without going through a printer's own cash
+  // drawer port. See: https://docs.sunmi.com/en-US/cdixeghjk491/xmxqeghjk513
+
+  /// Gets the USB cash drawer trigger. There is always exactly one, since the
+  /// SDK doesn't differentiate between multiple USB devices connected.
+  ///
+  /// The USB permission dialog may be shown by the OS the first time.
+  Future<CashDrawerTrigger> getCashDrawerTriggerUsb() async {
+    final id = await SunmiPrinterXPlatform.instance.getCashDrawerTriggerUsb();
+    return _buildCashDrawerTrigger(id);
+  }
+
+  /// Scans for nearby Bluetooth cash drawer triggers (named "CashDrawer_xxxxxx")
+  /// and returns their names, to let the user pick one to pair with.
+  ///
+  /// Requires the `bluetoothScan`, `bluetoothConnect` and `locationWhenInUse`
+  /// runtime permissions to be granted beforehand.
+  Future<List<String>> scanCashDrawerTriggerBle() {
+    return SunmiPrinterXPlatform.instance.scanCashDrawerTriggerBle();
+  }
+
+  /// Connects directly to the Bluetooth cash drawer trigger with the given
+  /// [name] (as returned by [scanCashDrawerTriggerBle]).
+  ///
+  /// The first time a cash drawer function is used, Android may show a
+  /// pairing dialog; the default PIN is the last 6 digits of the device name.
+  Future<CashDrawerTrigger> connectCashDrawerTriggerBle(String name) async {
+    final id =
+        await SunmiPrinterXPlatform.instance.connectCashDrawerTriggerBle(name);
+    return _buildCashDrawerTrigger(id);
+  }
+
+  CashDrawerTrigger _buildCashDrawerTrigger(String id) {
+    return CashDrawerTrigger(
+      id: id,
+      open: ({int openTimeMs = 200, int closeTimeMs = 200}) =>
+          SunmiPrinterXPlatform.instance.openCashDrawerTrigger(id,
+              openTimeMs: openTimeMs, closeTimeMs: closeTimeMs),
+      isOpen: () => SunmiPrinterXPlatform.instance.isCashDrawerTriggerOpen(id),
+      getSerialNo: () =>
+          SunmiPrinterXPlatform.instance.getCashDrawerTriggerSerialNo(id),
+    );
   }
 }

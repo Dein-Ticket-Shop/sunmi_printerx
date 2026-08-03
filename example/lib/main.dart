@@ -4,6 +4,7 @@ import 'dart:typed_data';
 
 import 'package:flutter/services.dart';
 import 'package:sunmi_printerx/alarm_lamp_color.dart';
+import 'package:sunmi_printerx/cash_drawer_trigger.dart';
 import 'package:sunmi_printerx/printer.dart';
 import 'package:sunmi_printerx/sunmi_printerx.dart';
 import 'package:sunmi_printerx/align.dart' as align;
@@ -27,6 +28,79 @@ class _MyAppState extends State<MyApp> {
   final _messangerKey = GlobalKey<ScaffoldMessengerState>();
   PrinterStatusBroadcastSubscription? _broadcastSubscription;
   PrinterStatusAction _lastBroadcastEvent = PrinterStatusAction.normal;
+
+  // ── Cash Drawer Trigger (standalone USB/BLE dongle) ──────────────────────
+  CashDrawerTrigger? _trigger;
+
+  Future<void> _connectTriggerUsb() async {
+    try {
+      final trigger = await _sunmiPrinterXPlugin.getCashDrawerTriggerUsb();
+      setState(() => _trigger = trigger);
+      _showSnackBar('Connected: ${trigger.id}');
+    } catch (e) {
+      _showSnackBar('Error: $e');
+    }
+  }
+
+  Future<void> _scanTriggerBle() async {
+    try {
+      final names = await _sunmiPrinterXPlugin.scanCashDrawerTriggerBle();
+      if (!mounted) return;
+      if (names.isEmpty) {
+        _showSnackBar('No Bluetooth trigger found');
+        return;
+      }
+      final selected = await showDialog<String>(
+        context: context,
+        builder: (context) => SimpleDialog(
+          title: const Text('Select trigger'),
+          children: names
+              .map((name) => SimpleDialogOption(
+                    onPressed: () => Navigator.of(context).pop(name),
+                    child: Text(name),
+                  ))
+              .toList(),
+        ),
+      );
+      if (selected == null) return;
+      final trigger =
+          await _sunmiPrinterXPlugin.connectCashDrawerTriggerBle(selected);
+      setState(() => _trigger = trigger);
+      _showSnackBar('Connected: ${trigger.id}');
+    } catch (e) {
+      _showSnackBar('Error: $e');
+    }
+  }
+
+  Future<void> _getSerialNo() async {
+    if (_trigger == null) return;
+    try {
+      final sn = await _trigger!.getSerialNo();
+      _showSnackBar('Serial number: $sn');
+    } catch (e) {
+      _showSnackBar('Error: $e');
+    }
+  }
+
+  Future<void> _openTrigger() async {
+    if (_trigger == null) return;
+    try {
+      await _trigger!.open();
+      _showSnackBar('Cash drawer opened');
+    } catch (e) {
+      _showSnackBar('Error: $e');
+    }
+  }
+
+  Future<void> _isTriggerOpen() async {
+    if (_trigger == null) return;
+    try {
+      final open = await _trigger!.isOpen();
+      _showSnackBar(open ? 'Cash drawer is open' : 'Cash drawer is closed');
+    } catch (e) {
+      _showSnackBar('Error: $e');
+    }
+  }
 
   void _showSnackBar(String message) {
     _messangerKey.currentState?.removeCurrentSnackBar();
@@ -264,6 +338,46 @@ class _MyAppState extends State<MyApp> {
                           TextButton(
                               onPressed: initDefaultPrinter,
                               child: const Text('Refresh')),
+                        ],
+                      ),
+                    ),
+                  ),
+                  // Cash Drawer Trigger (standalone USB/BLE dongle)
+                  Card(
+                    margin: const EdgeInsets.only(bottom: 12),
+                    child: Padding(
+                      padding: const EdgeInsets.all(12),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const Text('Cash Drawer Trigger',
+                              style: TextStyle(
+                                  fontSize: 18, fontWeight: FontWeight.bold)),
+                          Text(_trigger == null
+                              ? 'Not connected'
+                              : 'Connected: ${_trigger!.id}'),
+                          const SizedBox(height: 8),
+                          Wrap(
+                            spacing: 8,
+                            runSpacing: 8,
+                            children: [
+                              TextButton(
+                                  onPressed: _connectTriggerUsb,
+                                  child: const Text('Connect via USB')),
+                              TextButton(
+                                  onPressed: _scanTriggerBle,
+                                  child: const Text('Scan/Connect via BLE')),
+                              TextButton(
+                                  onPressed: _getSerialNo,
+                                  child: const Text('Get Serial Number')),
+                              TextButton(
+                                  onPressed: _openTrigger,
+                                  child: const Text('Open Drawer')),
+                              TextButton(
+                                  onPressed: _isTriggerOpen,
+                                  child: const Text('Check Status (isOpen)')),
+                            ],
+                          ),
                         ],
                       ),
                     ),

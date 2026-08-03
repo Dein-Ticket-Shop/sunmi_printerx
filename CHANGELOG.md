@@ -1,3 +1,8 @@
+## 1.4.0 (2026-08-03)
+
+-   Add support for the Sunmi Cash Drawer Trigger (standalone USB/BLE dongle): `getCashDrawerTriggerUsb`, `scanCashDrawerTriggerBle`, `connectCashDrawerTriggerBle`, `getCashDrawerTriggerSerialNo`, `CashDrawerTrigger.open`/`isOpen`/`getSerialNo`
+-   Work around unreliable native SDK callbacks confirmed against real hardware: BLE scan/connect no longer waits on `onFinish()` (bound to a fixed window instead), and opening the drawer confirms success via a status read instead of trusting the (never-invoked) completion callback
+
 ## 1.3.0 (2025-04-12)
 
 -   Add methods for querying the printer status
