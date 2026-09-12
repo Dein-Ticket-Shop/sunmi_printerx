@@ -13,7 +13,7 @@ dependencies:
     flutter_broadcasts:
         git:
             url: https://github.com/Dein-Ticket-Shop/flutter_broadcasts
-            ref: ec56c1687236e67febaadb5f6134b713e2020c51
+            ref: 026dbf4ac715c2e5e9681c2297e4e08da518c4aa
     plugin_platform_interface: ^2.0.2
 
 dev_dependencies:
